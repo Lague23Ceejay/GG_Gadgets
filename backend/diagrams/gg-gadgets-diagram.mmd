@@ -1,0 +1,66 @@
+%% diagrams/gg-gadgets-diagram.mmd
+%% Example Mermaid diagram for GG Gadgets backend (generated sample)
+
+graph LR
+  subgraph App
+    app["App / server"]
+  end
+
+  subgraph Routes
+    products_routes["products.routes.js"]
+    users_routes["users.routes.js"]
+    orders_routes["orders.routes.js"]
+    customers_routes["customers.routes.js"]
+    categories_routes["categories.routes.js"]
+    inventory_routes["inventory.routes.js"]
+  end
+
+  subgraph Controllers
+    products_controller["products.controller.js"]
+    users_controller["users.controller.js"]
+    orders_controller["orders.controller.js"]
+    customers_controller["customers.controller.js"]
+    categories_controller["categories.controller.js"]
+    inventory_controller["inventory.controller.js"]
+  end
+
+  subgraph Models
+    products_model["products.model.js"]
+    users_model["users.model.js"]
+    orders_model["orders.model.js"]
+    customers_model["customers.model.js"]
+    categories_model["categories.model.js"]
+    inventory_model["inventory.model.js"]
+  end
+
+  subgraph Middleware
+    auth_mw["auth.Middleware.js"]
+    validate_product["validateProduct.js"]
+    validate_order["validateOrder.js"]
+  end
+
+  app --> products_routes
+  app --> users_routes
+  app --> orders_routes
+  app --> customers_routes
+  app --> categories_routes
+  app --> inventory_routes
+
+  products_routes --> products_controller
+  users_routes --> users_controller
+  orders_routes --> orders_controller
+  customers_routes --> customers_controller
+  categories_routes --> categories_controller
+  inventory_routes --> inventory_controller
+
+  products_controller --> products_model
+  users_controller --> users_model
+  orders_controller --> orders_model
+  customers_controller --> customers_model
+  categories_controller --> categories_model
+  inventory_controller --> inventory_model
+
+  products_routes --> validate_product
+  orders_routes --> validate_order
+  users_routes --> auth_mw
+  orders_routes --> auth_mw

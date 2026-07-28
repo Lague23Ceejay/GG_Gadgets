@@ -1,0 +1,821 @@
+{
+  "info": {
+    "name": "GG Gadgets API",
+    "_postman_id": "gg-gadgets-api-collection",
+    "description": "Complete Postman collection for GG Gadgets backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+  "name": "Auth",
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "login"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Login successful",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Login successful\",\n  \"token\": \"<jwt_token>\",\n  \"user\": {\n    \"user_id\": 1,\n    \"username\": \"admin\",\n    \"role\": \"admin\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"role\": \"staff\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/register",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "register"]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created - User registered",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"role\": \"staff\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"message\": \"User created successfully\",\n  \"user_id\": 5\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Users",
+  "item": [
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/users",
+          "host": ["{{base_url}}"],
+          "path": ["users"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Users list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"user_id\": 1,\n    \"username\": \"admin\",\n    \"role\": \"admin\",\n    \"archived\": false\n  },\n  {\n    \"user_id\": 2,\n    \"username\": \"staff1\",\n    \"role\": \"staff\",\n    \"archived\": false\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get User by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/users/:id",
+          "host": ["{{base_url}}"],
+          "path": ["users", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - User found",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"user_id\": 2,\n  \"username\": \"staff1\",\n  \"role\": \"staff\",\n  \"archived\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "Archive User",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/users/archive/:id",
+          "host": ["{{base_url}}"],
+          "path": ["users", "archive", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - User archived",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"User archived successfully\",\n  \"user_id\": 2\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Products",
+  "item": [
+    {
+      "name": "Get All Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/products",
+          "host": ["{{base_url}}"],
+          "path": ["products"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Products list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"product_id\": 1,\n    \"name\": \"Gaming Mouse\",\n    \"category_id\": 2,\n    \"price\": 899.00,\n    \"stock\": 50,\n    \"archived\": false\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Product by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/products/:id",
+          "host": ["{{base_url}}"],
+          "path": ["products", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Product found",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"product_id\": 1,\n  \"name\": \"Gaming Mouse\",\n  \"category_id\": 2,\n  \"price\": 899.00,\n  \"stock\": 50,\n  \"archived\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Product (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Mechanical Keyboard\",\n  \"category_id\": 2,\n  \"price\": 2499.00,\n  \"stock\": 20\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/products",
+          "host": ["{{base_url}}"],
+          "path": ["products"]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created - Product added",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"message\": \"Product created successfully\",\n  \"product_id\": 5\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Product (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Mechanical Keyboard RGB\",\n  \"category_id\": 2,\n  \"price\": 2799.00,\n  \"stock\": 25\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/products/:id",
+          "host": ["{{base_url}}"],
+          "path": ["products", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Product updated",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Product updated successfully\",\n  \"product_id\": 5\n}"
+        }
+      ]
+    },
+    {
+      "name": "Archive Product (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/products/archive/:id",
+          "host": ["{{base_url}}"],
+          "path": ["products", "archive", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Product archived",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Product archived successfully\",\n  \"product_id\": 5\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Categories",
+  "item": [
+    {
+      "name": "Get All Categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/categories",
+          "host": ["{{base_url}}"],
+          "path": ["categories"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Categories list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"category_id\": 1,\n    \"name\": \"Laptops\",\n    \"archived\": false\n  },\n  {\n    \"category_id\": 2,\n    \"name\": \"Accessories\",\n    \"archived\": false\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Category by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/categories/:id",
+          "host": ["{{base_url}}"],
+          "path": ["categories", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Category found",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"category_id\": 2,\n  \"name\": \"Accessories\",\n  \"archived\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Category (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Keyboards\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/categories",
+          "host": ["{{base_url}}"],
+          "path": ["categories"]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created - Category added",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"message\": \"Category created successfully\",\n  \"category_id\": 5\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Category (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Gaming Keyboards\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/categories/:id",
+          "host": ["{{base_url}}"],
+          "path": ["categories", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Category updated",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Category updated successfully\",\n  \"category_id\": 5\n}"
+        }
+      ]
+    },
+    {
+      "name": "Archive Category (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/categories/archive/:id",
+          "host": ["{{base_url}}"],
+          "path": ["categories", "archive", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Category archived",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Category archived successfully\",\n  \"category_id\": 5\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Customers",
+  "item": [
+    {
+      "name": "Get All Customers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers",
+          "host": ["{{base_url}}"],
+          "path": ["customers"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Customers list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"customer_id\": 1,\n    \"first_name\": \"Juan\",\n    \"last_name\": \"Dela Cruz\",\n    \"email\": \"juan@example.com\",\n    \"phone\": \"09123456789\",\n    \"archived\": false\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Customer by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers/:id",
+          "host": ["{{base_url}}"],
+          "path": ["customers", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Customer found",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"customer_id\": 1,\n  \"first_name\": \"Juan\",\n  \"last_name\": \"Dela Cruz\",\n  \"email\": \"juan@example.com\",\n  \"phone\": \"09123456789\",\n  \"archived\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Maria\",\n  \"last_name\": \"Santos\",\n  \"email\": \"maria@example.com\",\n  \"phone\": \"09998887777\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers",
+          "host": ["{{base_url}}"],
+          "path": ["customers"]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created - Customer added",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"message\": \"Customer created successfully\",\n  \"customer_id\": 10\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Customer",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Maria Clara\",\n  \"last_name\": \"Santos\",\n  \"email\": \"maria.clara@example.com\",\n  \"phone\": \"09998887777\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/customers/:id",
+          "host": ["{{base_url}}"],
+          "path": ["customers", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Customer updated",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Customer updated successfully\",\n  \"customer_id\": 10\n}"
+        }
+      ]
+    },
+    {
+      "name": "Archive Customer",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/customers/archive/:id",
+          "host": ["{{base_url}}"],
+          "path": ["customers", "archive", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Customer archived",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Customer archived successfully\",\n  \"customer_id\": 10\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Orders",
+  "item": [
+    {
+      "name": "Get All Orders (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/orders",
+          "host": ["{{base_url}}"],
+          "path": ["orders"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Orders list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"order_id\": 1,\n    \"customer_id\": 3,\n    \"total_amount\": 3499.00,\n    \"status\": \"Pending\",\n    \"created_at\": \"2025-01-10T10:15:00Z\"\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Order by ID (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/orders/:id",
+          "host": ["{{base_url}}"],
+          "path": ["orders", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Order found",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"order_id\": 1,\n  \"customer_id\": 3,\n  \"total_amount\": 3499.00,\n  \"status\": \"Pending\",\n  \"items\": [\n    {\n      \"product_id\": 2,\n      \"quantity\": 1,\n      \"price\": 3499.00\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customer_id\": 3,\n  \"items\": [\n    {\n      \"product_id\": 2,\n      \"quantity\": 1\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/orders",
+          "host": ["{{base_url}}"],
+          "path": ["orders"]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created - Order created",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"message\": \"Order created successfully\",\n  \"order_id\": 12\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Order Status (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"Completed\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/orders/status/:id",
+          "host": ["{{base_url}}"],
+          "path": ["orders", "status", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Order status updated",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Order status updated successfully\",\n  \"order_id\": 12\n}"
+        }
+      ]
+    },
+    {
+      "name": "Archive Order (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/orders/archive/:id",
+          "host": ["{{base_url}}"],
+          "path": ["orders", "archive", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Order archived",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Order archived successfully\",\n  \"order_id\": 12\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Order Items",
+  "item": [
+    {
+      "name": "Get Items for Order",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/order-items/:order_id",
+          "host": ["{{base_url}}"],
+          "path": ["order-items", ":order_id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Order items list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"order_item_id\": 1,\n    \"order_id\": 12,\n    \"product_id\": 2,\n    \"quantity\": 1,\n    \"price\": 3499.00\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Add Item to Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"order_id\": 12,\n  \"product_id\": 3,\n  \"quantity\": 2\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/order-items",
+          "host": ["{{base_url}}"],
+          "path": ["order-items"]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created - Item added",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"message\": \"Order item added successfully\",\n  \"order_item_id\": 8\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Order Item",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 3\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/order-items/:id",
+          "host": ["{{base_url}}"],
+          "path": ["order-items", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Order item updated",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Order item updated successfully\",\n  \"order_item_id\": 8\n}"
+        }
+      ]
+    },
+    {
+      "name": "Remove Order Item",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/order-items/:id",
+          "host": ["{{base_url}}"],
+          "path": ["order-items", ":id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Order item removed",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Order item removed successfully\",\n  \"order_item_id\": 8\n}"
+        }
+      ]
+    }
+  ]
+},
+{
+  "name": "Inventory",
+  "item": [
+    {
+      "name": "Get Inventory",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/inventory",
+          "host": ["{{base_url}}"],
+          "path": ["inventory"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Inventory list",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"inventory_id\": 1,\n    \"product_id\": 2,\n    \"stock\": 50,\n    \"last_updated\": \"2025-01-10T10:15:00Z\"\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Inventory by Product ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/inventory/:product_id",
+          "host": ["{{base_url}}"],
+          "path": ["inventory", ":product_id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Inventory found",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"inventory_id\": 1,\n  \"product_id\": 2,\n  \"stock\": 50,\n  \"last_updated\": \"2025-01-10T10:15:00Z\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Inventory (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"stock\": 60\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/inventory/:product_id",
+          "host": ["{{base_url}}"],
+          "path": ["inventory", ":product_id"]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK - Inventory updated",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"message\": \"Inventory updated successfully\",\n  \"product_id\": 2,\n  \"new_stock\": 60\n}"
+        }
+      ]
+    }
+  ]
+}
+  ]
+}

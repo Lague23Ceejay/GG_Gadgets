@@ -1,0 +1,4 @@
+{
+  "info": { "name": "tmp", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "item": [ { "name": "Ping Products", "request": { "method": "GET", "url": "http://localhost:3000/api/v1/products" } } ]
+}

@@ -1,0 +1,11 @@
+﻿node_modules/
+coverage/
+reports/
+.vscode/
+dist/
+npm-debug.log
+
+# Environment files
+.env
+.env.*
+!.env.example
