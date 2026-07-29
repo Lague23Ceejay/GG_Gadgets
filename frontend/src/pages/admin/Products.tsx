@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { productsApi } from "@/lib/products";
 import type { Product } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
+import { ProductImageManager } from "@/pages/admin/ProductImageManager";
 
 const emptyForm = { name: "", description: "", price: "", stock: "" };
 
@@ -16,6 +17,7 @@ export function AdminProducts() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -51,15 +53,14 @@ export function AdminProducts() {
     setSubmitting(true);
     setError(null);
 
-    const payload: Record<string, unknown> = {
+    const payload = {
       name: form.name,
       description: form.description,
       price: Number(form.price),
       stock: Number(form.stock),
+      category_id: null,
       attributes: {},
     };
-    // Only include category_id if one is actually selected — the backend
-    // treats an explicit null as "invalid category", not "no category".
 
     try {
       if (editingId) {
@@ -157,55 +158,75 @@ export function AdminProducts() {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Price</th>
               <th className="px-4 py-3">Stock</th>
+              <th className="px-4 py-3">Images</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
                   Loading…
                 </td>
               </tr>
             )}
             {!loading && products.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
                   No products yet. Create your first one above.
                 </td>
               </tr>
             )}
             {products.map((product) => (
-              <tr
-                key={product.product_id}
-                className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
-              >
-                <td className="px-4 py-3 font-medium">{product.name}</td>
-                <td className="px-4 py-3 font-mono">₱{Number(product.price).toFixed(2)}</td>
-                <td className="px-4 py-3">
-                  {product.stock === 0 ? (
-                    <Badge tone="danger">0</Badge>
-                  ) : product.stock <= 5 ? (
-                    <Badge tone="spark">{product.stock}</Badge>
-                  ) : (
-                    product.stock
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => openEdit(product)}
-                    className="mr-3 text-accent-500 hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleArchive(product.product_id)}
-                    className="text-danger-500 hover:underline"
-                  >
-                    Archive
-                  </button>
-                </td>
-              </tr>
+              <Fragment key={product.product_id}>
+                <tr
+                  className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
+                >
+                  <td className="px-4 py-3 font-medium">{product.name}</td>
+                  <td className="px-4 py-3 font-mono">₱{Number(product.price).toFixed(2)}</td>
+                  <td className="px-4 py-3">
+                    {product.stock === 0 ? (
+                      <Badge tone="danger">0</Badge>
+                    ) : product.stock <= 5 ? (
+                      <Badge tone="spark">{product.stock}</Badge>
+                    ) : (
+                      product.stock
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() =>
+                        setExpandedId(expandedId === product.product_id ? null : product.product_id)
+                      }
+                      className="text-accent-500 hover:underline"
+                    >
+                      {expandedId === product.product_id ? "Hide" : "Manage"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => openEdit(product)}
+                      className="mr-3 text-accent-500 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleArchive(product.product_id)}
+                      className="text-danger-500 hover:underline"
+                    >
+                      Archive
+                    </button>
+                  </td>
+                </tr>
+
+                {expandedId === product.product_id && (
+                  <tr className="bg-zinc-50 dark:bg-zinc-900/50">
+                    <td colSpan={5} className="px-4 py-4">
+                      <ProductImageManager productId={product.product_id} />
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
         </table>
