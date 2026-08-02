@@ -23,7 +23,9 @@ cp .env.example .env
 npm run dev
 ```
 
-Opens at http://localhost:5173. Make sure your backend is running on the URL in `VITE_API_URL`.
+Opens at http://localhost:5173. Make sure your backend is running on the URL in 
+or in http://localhost:5174
+`VITE_API_URL`.
 
 ## What's built
 
