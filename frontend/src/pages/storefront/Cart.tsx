@@ -55,9 +55,23 @@ export function Cart() {
         <p className="mt-2 text-zinc-500">
           Order <span className="font-mono">#{orderId}</span> is confirmed. We'll be in touch.
         </p>
-        <Link to="/" className="mt-6 inline-block text-accent-500 hover:underline">
-          Keep shopping
-        </Link>
+
+        <div className="mt-4 rounded-lg bg-accent-50 px-4 py-3 text-sm text-accent-700 dark:bg-accent-500/10 dark:text-accent-300">
+          Save your order number — you'll need it to check your order status later.
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            to={`/track-order?order_id=${orderId}&email=${encodeURIComponent(form.email)}`}
+            className="text-accent-500 hover:underline"
+          >
+            Track this order →
+          </Link>
+          <span className="hidden text-zinc-300 sm:inline">·</span>
+          <Link to="/" className="text-accent-500 hover:underline">
+            Keep shopping
+          </Link>
+        </div>
       </div>
     );
   }

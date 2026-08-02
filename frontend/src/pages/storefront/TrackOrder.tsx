@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api, ApiError } from "@/lib/api";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -21,21 +22,21 @@ interface TrackedOrder {
 }
 
 export function TrackOrder() {
-  const [orderId, setOrderId] = useState("");
-  const [email, setEmail] = useState("");
+  const [searchParams] = useSearchParams();
+  const [orderId, setOrderId] = useState(searchParams.get("order_id") ?? "");
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const lookup = async (id: string, addr: string) => {
     setLoading(true);
     setError(null);
     setOrder(null);
 
     try {
       const data = await api.get<TrackedOrder>(
-        `/orders/track?order_id=${encodeURIComponent(orderId)}&email=${encodeURIComponent(email)}`
+        `/orders/track?order_id=${encodeURIComponent(id)}&email=${encodeURIComponent(addr)}`
       );
       setOrder(data);
     } catch (err) {
@@ -43,6 +44,23 @@ export function TrackOrder() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Arriving here via the "Track your order" link on the checkout
+  // confirmation screen already has both values — just look it up right away
+  // instead of making the person retype what they just entered.
+  useEffect(() => {
+    const idParam = searchParams.get("order_id");
+    const emailParam = searchParams.get("email");
+    if (idParam && emailParam) {
+      lookup(idParam, emailParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    lookup(orderId, email);
   };
 
   return (

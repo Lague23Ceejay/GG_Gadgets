@@ -51,9 +51,11 @@ export interface OrderItem {
 export interface Order {
   order_id: number;
   customer_id: number;
+  customer_name?: string; // present on list view
   order_status: OrderStatus;
   total_amount: number;
   extra: Record<string, unknown>;
+  customer?: { full_name: string; email: string; phone: string | null }; // present on detail view
   items?: OrderItem[];
   created_at: string;
   updated_at: string;
