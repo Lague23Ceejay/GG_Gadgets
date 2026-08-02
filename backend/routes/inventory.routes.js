@@ -11,7 +11,7 @@ const router = express.Router();
 router.get(
   '/',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager', 'fulfillment'),
   controller.getAll
 );
 
@@ -19,7 +19,7 @@ router.get(
 router.get(
   '/:id/logs',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager', 'fulfillment'),
   validateNumeric('id'),
   controller.getLogs
 );
@@ -28,7 +28,7 @@ router.get(
 router.post(
   '/',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager', 'fulfillment'),
   validateInventoryLog,
   controller.create
 );

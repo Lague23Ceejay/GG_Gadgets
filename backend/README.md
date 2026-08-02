@@ -1,100 +1,76 @@
-﻿# GetGood (GG) Gadgets API
+﻿# GG Gadgets API
 
-Backend API for GG Gadgets, an e-commerce system for managing products, customers, orders, users, categories, and inventory.
+Backend service for the GG Gadgets e-commerce platform. It provides authentication, product management, customer and order workflows, category handling, user administration, and inventory updates through a REST API.
 
-## Features
+## What this backend does
 
-- JWT-based authentication and authorization
-- Role-based access control for protected resources
-- CRUD operations for products, customers, categories, orders, users, and inventory
-- Request validation using Express middleware
-- PostgreSQL database integration via `pg`
-- Automated tests with Jest and Supertest
-- Postman collections and API documentation included
+- Authenticates users with JWT
+- Supports role-based access for protected endpoints
+- Exposes CRUD routes for products, customers, categories, orders, users, and inventory
+- Validates request payloads with Express middleware
+- Stores data in PostgreSQL through the `pg` pool
+- Includes Jest/Supertest coverage and Postman documentation
 
-## Backend structure
+## Project structure
 
-- `app.js` — main Express application setup, middleware, and route registration
-- `server.js` — starts the HTTP server and loads environment variables
-- `.env.example` — example environment variables for local setup
-- `package.json` — project metadata, scripts, dependencies, and dev dependencies
-- `eslint.config.cjs` — ESLint rules and configuration
-- `test_mod.mjs` — custom test module helper used in test setup
-- `test_server.js` — helper for server tests and integration testing
-
-### config/
-- `db.js` — PostgreSQL database connection configuration and pool setup
-
-### controllers/
-- `auth.controller.js` — login, signup, and token-related request handlers
-- `categories.controller.js` — category resource handlers and business logic
-- `customers.controller.js` — customer CRUD handlers and operations
-- `inventory.controller.js` — inventory log handling and stock management
-- `orders.controller.js` — order creation, updates, and retrieval logic
-- `products.controller.js` — product CRUD handlers and search/filter logic
-- `users.controller.js` — user management and account operations
-
-### models/
-- `categories.model.js` — database queries for categories
-- `customers.model.js` — customer-related SQL operations
-- `inventory.model.js` — inventory and stock query implementations
-- `orders.model.js` — order and order item database access
-- `products.model.js` — product query and persistence functions
-- `users.model.js` — user query and authentication data access
-
-### routes/
-- `auth.routes.js` — authentication and token routes
-- `categories.routes.js` — category endpoints
-- `customers.routes.js` — customer endpoints
-- `inventory.routes.js` — inventory endpoints
-- `orders.routes.js` — order endpoints
-- `products.routes.js` — product endpoints
-- `users.routes.js` — user endpoints
-- `tests/` — route and controller test files for Jest and Supertest
-
-### middleware/
-- `auth.Middleware.js` — authentication helpers and protected route support
-- `requireRole.js` — role-based authorization middleware
-- `validateId.js` — ID parameter validation middleware
-- `validateInventoryLog.js` — inventory log validation for requests
-- `validateOrder.js` — order request body validation
-- `validateOrderItem.js` — validation for order item payloads
-- `validateOrderStatus.js` — order status update validation
-- `validateProduct.js` — product request validation rules
-- `validationMiddleware.js` — generic validation result handling
-- `verifyToken.js` — JWT token verification middleware
-
-### docs/
-- `db_init.sql` — sample database initialization SQL script
-- `gg-gadgets-api.yaml` — OpenAPI/Swagger API specification
-- `postman-collection.json` — exported Postman collection for API testing
-- `test.postman_collection.json` — additional Postman collection for tests
-- `tmp-collection.json` — temporary Postman export file
-- `POSTMAN_README.md` — instructions for using Postman with this API
-
-### coverage/
-- generated code coverage reports from Jest test runs
-
-### diagrams/
-- `gg-gadgets-diagram.mmd` — Mermaid diagram source for system architecture or entity flow
-
-### reports/
-- `postman-report.html` — generated HTML report from Newman/Postman runs
+```text
+backend/
+├── app.js                     # Express app setup, middleware, CORS, and route mounting
+├── server.js                  # Starts the HTTP server and loads the app
+├── config/
+│   └── db.js                  # PostgreSQL connection pool and database config
+├── controllers/
+│   ├── auth.controller.js     # Login, registration, and token-related logic
+│   ├── products.controller.js # Product CRUD and search logic
+│   ├── customers.controller.js# Customer CRUD operations
+│   ├── orders.controller.js   # Order creation and order management
+│   ├── categories.controller.js# Category CRUD logic
+│   ├── users.controller.js    # User management endpoints
+│   └── inventory.controller.js# Inventory updates and stock movements
+├── models/
+│   ├── products.model.js      # Product database queries
+│   ├── customers.model.js     # Customer query functions
+│   ├── orders.model.js        # Order and order item queries
+│   ├── categories.model.js    # Category database access
+│   ├── users.model.js         # User and auth query functions
+│   └── inventory.model.js     # Inventory-related SQL queries
+├── routes/
+│   ├── auth.routes.js         # Authentication endpoints
+│   ├── products.routes.js     # Product API routes
+│   ├── customers.routes.js    # Customer API routes
+│   ├── orders.routes.js       # Order API routes
+│   ├── categories.routes.js   # Category API routes
+│   ├── users.routes.js        # User API routes
+│   └── inventory.routes.js    # Inventory API routes
+├── middleware/
+│   ├── verifyToken.js         # JWT verification middleware
+│   ├── requireRole.js         # Role-based access control
+│   ├── validationMiddleware.js# Shared validation response handling
+│   └── validate*.js           # Request validation rules for resources
+├── docs/
+│   ├── db_init.sql            # Sample database initialization SQL
+│   ├── gg-gadgets-api.yaml    # OpenAPI/Swagger specification
+│   └── POSTMAN_README.md      # Postman usage instructions
+├── tests/                     # Jest and Supertest test suites
+└── package.json               # Scripts, dependencies, and project metadata
+```
 
 ## Requirements
 
-- Node.js 18 or newer
-- PostgreSQL database
+- Node.js 18+
+- PostgreSQL
 - npm
 
 ## Setup
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
-2. Create a `.env` file in the project root with values like:
+2. Create a `.env` file in this folder using the example values:
+
    ```env
    DATABASE_URL=postgres://your_user:your_password@localhost:5432/your_database
    JWT_SECRET=your_jwt_secret_here
@@ -103,40 +79,56 @@ Backend API for GG Gadgets, an e-commerce system for managing products, customer
    ```
 
 3. Start the development server:
+
    ```bash
    npm run dev
    ```
 
+The API will be available at `http://localhost:3000`.
+
 ## Available scripts
 
 - `npm start` — start the server
-- `npm run dev` — start the server with nodemon
+- `npm run dev` — start with nodemon
 - `npm test` — run Jest tests with coverage
 - `npm run lint` — run ESLint
-- `npm run postman` — run Newman collection and generate HTML report
+- `npm run postman` — run the Postman collection and generate an HTML report
 
-## API base URL
+## API overview
 
-Local server:
+Base URL:
 
-`http://localhost:3000`
+```text
+http://localhost:3000/api/v1
+```
 
-curl -X POST http://localhost:3000/api/v1/auth/register -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"yourSecurePassword123\",\"role\":\"admin\"}"
+Main routes:
 
-## Generate a new secret. Run this in any terminal
+- `/auth`
+- `/products`
+- `/customers`
+- `/categories`
+- `/orders`
+- `/users`
+- `/inventory`
+
+Example auth request:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"yourSecurePassword123"}'
+```
+
+## Generate a JWT secret
+
+Run this in any terminal:
+
+```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-
-Main API routes:
-
-- `/api/v1/auth`
-- `/api/v1/products`
-- `/api/v1/customers`
-- `/api/v1/categories`
-- `/api/v1/orders`
-- `/api/v1/users`
-- `/api/v1/inventory`
+```
 
 ## Notes
 
-- Keep `.env` private and never commit secrets to source control.
-- Use the `docs/` folder for API specs, Postman collections, and test documentation.
+- Keep environment variables private and avoid committing secrets to source control.
+- Use the docs folder for API examples, SQL setup, and Postman collections.

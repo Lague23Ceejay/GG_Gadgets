@@ -13,12 +13,12 @@ router.get('/', controller.getAll);
 router.get('/:id', validateNumeric('id'), controller.getOne);
 
 // CREATE category (admin-only)
-router.post('/', verifyToken, requireRole('admin'), controller.create);
+router.post('/', verifyToken, requireRole('super_admin', 'store_manager'), controller.create);
 
 // UPDATE category (admin-only)
-router.put('/:id', verifyToken, requireRole('admin'), validateNumeric('id'), controller.update);
+router.put('/:id', verifyToken, requireRole('super_admin', 'store_manager'), validateNumeric('id'), controller.update);
 
 // ARCHIVE category (admin-only)
-router.delete('/:id', verifyToken, requireRole('admin'), validateNumeric('id'), controller.archive);
+router.delete('/:id', verifyToken, requireRole('super_admin', 'store_manager'), validateNumeric('id'), controller.archive);
 
 export default router;

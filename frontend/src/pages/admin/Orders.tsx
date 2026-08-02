@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input, Label } from "@/components/ui/Input";
+import { useAuth } from "@/context/AuthContext";
 
 const STATUS_TONE: Record<OrderStatus, "spark" | "success" | "danger"> = {
   pending: "spark",
@@ -16,6 +17,8 @@ const STATUS_TONE: Record<OrderStatus, "spark" | "success" | "danger"> = {
 const emptyItemForm = { product_id: "", quantity: "1" };
 
 export function AdminOrders() {
+const { user } = useAuth();
+const canEditItems = user?.role !== "fulfillment";
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,12 +158,14 @@ export function AdminOrders() {
                     >
                       {expandedId === order.order_id ? "Hide" : "View items"}
                     </button>
+                    {canEditItems && (
                     <button
                       onClick={() => handleArchive(order.order_id)}
                       className="text-danger-500 hover:underline"
                     >
                       Archive
                     </button>
+                    )}
                   </td>
                 </tr>
 
@@ -193,7 +198,7 @@ export function AdminOrders() {
                             </ul>
                           )}
                         </div>
-
+                        {canEditItems && (
                         <div>
                           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
                             Add item
@@ -240,6 +245,7 @@ export function AdminOrders() {
                             </Button>
                           </form>
                         </div>
+                        )}
                       </div>
                     </td>
                   </tr>

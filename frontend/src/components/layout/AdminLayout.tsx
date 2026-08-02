@@ -2,17 +2,21 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 
-const NAV_ITEMS = [
-  { to: "/admin", label: "Dashboard", end: true },
-  { to: "/admin/products", label: "Products" },
-  { to: "/admin/categories", label: "Categories" },
-  { to: "/admin/customers", label: "Customers" },
-  { to: "/admin/orders", label: "Orders" },
-  { to: "/admin/inventory", label: "Inventory" },
+type Role = "super_admin" | "store_manager" | "fulfillment";
+
+const NAV_ITEMS: { to: string; label: string; end?: boolean; roles: Role[] }[] = [
+  { to: "/admin", label: "Dashboard", end: true, roles: ["super_admin", "store_manager", "fulfillment"] },
+  { to: "/admin/products", label: "Products", roles: ["super_admin", "store_manager"] },
+  { to: "/admin/categories", label: "Categories", roles: ["super_admin", "store_manager"] },
+  { to: "/admin/customers", label: "Customers", roles: ["super_admin", "store_manager"] },
+  { to: "/admin/orders", label: "Orders", roles: ["super_admin", "store_manager", "fulfillment"] },
+  { to: "/admin/inventory", label: "Inventory", roles: ["super_admin", "store_manager", "fulfillment"] },
+  { to: "/admin/users", label: "Staff accounts", roles: ["super_admin"] },
 ];
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
+  const visibleNavItems = NAV_ITEMS.filter((item) => user && item.roles.includes(user.role));
 
   return (
     <div className="flex min-h-screen bg-canvas-light text-zinc-900 transition-theme dark:bg-canvas-dark dark:text-zinc-100">
@@ -22,7 +26,7 @@ export function AdminLayout() {
         </Link>
 
         <nav className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -45,7 +49,7 @@ export function AdminLayout() {
         <header className="flex h-16 items-center justify-between border-b border-zinc-200 px-4 transition-theme dark:border-zinc-800 sm:px-6">
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Signed in as <span className="font-medium text-zinc-800 dark:text-zinc-200">{user?.username}</span>{" "}
-            <span className="font-mono text-xs">({user?.role})</span>
+            <span className="font-mono text-xs">({user?.role.replace("_", " ")})</span>
           </p>
           <div className="flex items-center gap-3">
             <ThemeToggle />

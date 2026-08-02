@@ -16,8 +16,9 @@ export const registerUser = (req, res, next) => {
         return res.status(400).json({ error: "password must be at least 8 characters long" });
     }
 
-    if (!["admin", "staff"].includes(role)) {
-        return res.status(400).json({ error: "role must be either 'admin' or 'staff'" });
+    const VALID_ROLES = ["super_admin", "store_manager", "fulfillment"];
+    if (!VALID_ROLES.includes(role)) {
+        return res.status(400).json({ error: `role must be one of: ${VALID_ROLES.join(", ")}` });
     }
 
     next();

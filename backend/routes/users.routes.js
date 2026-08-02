@@ -6,8 +6,8 @@ import { requireRole } from "../middleware/requireRole.js";
 
 const router = express.Router();
 
-router.get("/", verifyToken, requireRole("admin"), UsersController.getAll);
-router.get("/:id", verifyToken, requireRole("admin"), UsersController.getById);
-router.delete("/:id", verifyToken, requireRole("admin"), UsersController.archive);
+router.get("/", verifyToken, requireRole("super_admin"), UsersController.getAll);
+router.get("/:id", verifyToken, requireRole("super_admin"), UsersController.getById);
+router.delete("/:id", verifyToken, requireRole("super_admin"), UsersController.archive);
 
 export default router;

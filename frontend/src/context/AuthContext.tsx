@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 interface AuthUser {
   user_id: number;
   username: string;
-  role: "admin" | "staff";
+  role: "super_admin" | "store_manager" | "fulfillment";
 }
 
 interface LoginResponse {

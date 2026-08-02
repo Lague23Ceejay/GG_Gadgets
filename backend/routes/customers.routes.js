@@ -13,12 +13,12 @@ router.get('/', controller.getAll);
 router.get('/:id', validateNumeric('id'), controller.getOne);
 
 // CREATE customer (admin-only)
-router.post('/', verifyToken, requireRole('admin'), controller.create);
+router.post('/', verifyToken, requireRole('super_admin', 'store_manager'), controller.create);
 
 // UPDATE customer (admin-only)
-router.put('/:id', verifyToken, requireRole('admin'), validateNumeric('id'), controller.update);
+router.put('/:id', verifyToken, requireRole('super_admin', 'store_manager'), validateNumeric('id'), controller.update);
 
 // ARCHIVE customer (admin-only)
-router.delete('/:id', verifyToken, requireRole('admin'), validateNumeric('id'), controller.archive);
+router.delete('/:id', verifyToken, requireRole('super_admin', 'store_manager'), validateNumeric('id'), controller.archive);
 
 export default router;

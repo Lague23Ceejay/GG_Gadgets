@@ -17,7 +17,7 @@ router.get('/:id', validateNumeric('id'), controller.getOne);
 router.post(
   '/',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   validateProduct,
   controller.create
 );
@@ -26,7 +26,7 @@ router.post(
 router.put(
   '/:id',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   validateNumeric('id'),
   validateProduct,
   controller.update
@@ -36,7 +36,7 @@ router.put(
 router.delete(
   '/:id',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   validateNumeric('id'),
   controller.archive
 );
@@ -52,7 +52,7 @@ router.get('/:id/images', validateNumeric('id'), controller.listImages);
 router.post(
   '/:id/images',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   validateNumeric('id'),
   controller.addImage
 );
@@ -61,7 +61,7 @@ router.post(
 router.delete(
   '/images/:imageId',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   controller.deleteImage
 );
 
@@ -73,7 +73,7 @@ router.delete(
 router.post(
   '/:id/categories',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   validateNumeric('id'),
   controller.assignCategory
 );
@@ -82,7 +82,7 @@ router.post(
 router.delete(
   '/:id/categories/:categoryId',
   verifyToken,
-  requireRole('admin'),
+  requireRole('super_admin', 'store_manager'),
   validateNumeric('id'),
   controller.removeCategory
 );

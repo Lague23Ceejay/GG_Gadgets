@@ -9,75 +9,40 @@ import validateOrderStatus from '../middleware/validateOrderStatus.js';
 
 const router = express.Router();
 
+// All three roles need visibility into orders to do their jobs
+const CAN_VIEW = requireRole('super_admin', 'store_manager', 'fulfillment');
+// Creating orders / editing line items is a catalog-adjacent operation —
+// Fulfillment only touches status, not order composition
+const CAN_EDIT_ITEMS = requireRole('super_admin', 'store_manager');
+// Fulfillment's actual job: move orders through their lifecycle
+const CAN_UPDATE_STATUS = requireRole('super_admin', 'store_manager', 'fulfillment');
+// Deleting order history is destructive — Fulfillment is explicitly blocked from this
+const CAN_ARCHIVE = requireRole('super_admin', 'store_manager');
+
 // =========================
 // ORDERS
 // =========================
 
-// GET all orders (admin-only)
-router.get(
-  '/',
-  verifyToken,
-  requireRole('admin'),
-  controller.getAll
-);
+router.get('/', verifyToken, CAN_VIEW, controller.getAll);
+router.get('/:id', verifyToken, CAN_VIEW, validateNumeric('id'), controller.getOne);
+router.post('/', verifyToken, CAN_EDIT_ITEMS, validateOrder, controller.create);
 
-// GET one order (admin-only)
-router.get(
-  '/:id',
-  verifyToken,
-  requireRole('admin'),
-  validateNumeric('id'),
-  controller.getOne
-);
-
-// CREATE order (admin-only)
-router.post(
-  '/',
-  verifyToken,
-  requireRole('admin'),
-  validateOrder,
-  controller.create
-);
-
-// UPDATE order status (admin-only)
 router.put(
   '/:id/status',
   verifyToken,
-  requireRole('admin'),
+  CAN_UPDATE_STATUS,
   validateNumeric('id'),
   validateOrderStatus,
   controller.updateStatus
 );
 
-// ARCHIVE order (admin-only)
-router.delete(
-  '/:id',
-  verifyToken,
-  requireRole('admin'),
-  validateNumeric('id'),
-  controller.archive
-);
+router.delete('/:id', verifyToken, CAN_ARCHIVE, validateNumeric('id'), controller.archive);
 
 // =========================
 // ORDER ITEMS
 // =========================
 
-// ADD item to order (admin-only)
-router.post(
-  '/items',
-  verifyToken,
-  requireRole('admin'),
-  validateOrderItem,
-  controller.addItem
-);
-
-// DELETE order item (admin-only)
-router.delete(
-  '/items/:id',
-  verifyToken,
-  requireRole('admin'),
-  validateNumeric('id'),
-  controller.deleteItem
-);
+router.post('/items', verifyToken, CAN_EDIT_ITEMS, validateOrderItem, controller.addItem);
+router.delete('/items/:id', verifyToken, CAN_EDIT_ITEMS, validateNumeric('id'), controller.deleteItem);
 
 export default router;
