@@ -1,9 +1,8 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import jwt from "jsonwebtoken";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default async function handler(request: VercelRequest, response: VercelResponse) {
-  const body = request.body as HandleUploadBody;
+export default async function handler(request: Request): Promise<Response> {
+  const body = (await request.json()) as HandleUploadBody;
 
   try {
     const jsonResponse = await handleUpload({
@@ -11,9 +10,9 @@ export default async function handler(request: VercelRequest, response: VercelRe
       request,
       onBeforeGenerateToken: async (_pathname, clientPayload) => {
         // clientPayload carries the admin's JWT from the browser (see upload call
-        // in AdminProducts.tsx). We verify it here with the SAME JWT_SECRET your
-        // Express backend uses, so only a logged-in admin can get an upload token —
-        // Vercel Blob itself has no idea about your users/roles.
+        // in ProductImageManager.tsx). We verify it here with the SAME JWT_SECRET
+        // your Express backend uses, so only a logged-in admin can get an upload
+        // token — Vercel Blob itself has no idea about your users/roles.
         const token = typeof clientPayload === "string" ? clientPayload : null;
         if (!token) {
           throw new Error("Missing auth token for upload");
@@ -26,8 +25,11 @@ export default async function handler(request: VercelRequest, response: VercelRe
           throw new Error("Invalid or expired session — please log in again");
         }
 
-        if (decoded.role !== "admin") {
-          throw new Error("Only admins can upload product images");
+        // Matches the roles allowed to manage the product catalog on the backend
+        // (products/categories routes use requireRole('super_admin', 'store_manager'))
+        const ALLOWED_ROLES = ["super_admin", "store_manager"];
+        if (!decoded.role || !ALLOWED_ROLES.includes(decoded.role)) {
+          throw new Error("You don't have permission to upload product images");
         }
 
         return {
@@ -37,15 +39,12 @@ export default async function handler(request: VercelRequest, response: VercelRe
         };
       },
       onUploadCompleted: async ({ blob }) => {
-        // Runs after the file is actually stored in Blob. Just logging for now —
-        // the client is responsible for calling POST /products/:id/images with
-        // blob.url once the upload() promise resolves.
         console.log("Blob upload completed:", blob.url);
       },
     });
 
-    return response.status(200).json(jsonResponse);
+    return Response.json(jsonResponse);
   } catch (error) {
-    return response.status(400).json({ error: (error as Error).message });
+    return Response.json({ error: (error as Error).message }, { status: 400 });
   }
 }

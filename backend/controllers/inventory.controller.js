@@ -21,11 +21,9 @@ export const getLogs = async (req, res) => {
     const InventoryModel = mod.default ?? mod;
 
     const data = await InventoryModel.getLogsByProduct(id);
-    if (!data || data.length === 0) {
-      return res.status(404).json({ error: 'No logs found for this product' });
-    }
-
-    return res.status(200).json(data);
+    // An empty log history is a normal state (no adjustments made yet),
+    // not an error — return [] like every other list endpoint does.
+    return res.status(200).json(data ?? []);
   } catch (err) {
     console.error('Error fetching inventory logs:', err);
     return res.status(500).json({ error: 'Internal server error' });
