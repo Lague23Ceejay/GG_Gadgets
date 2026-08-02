@@ -51,7 +51,7 @@ export const create = async (req, res) => {
       metadata: metadata ?? {}
     });
 
-    return res.status(201).json(customer);
+    return res.status(201).json({ customer_id: customer });
   } catch (err) {
     console.error('Error creating customer:', err);
     return res.status(500).json({ error: 'Internal server error' });
