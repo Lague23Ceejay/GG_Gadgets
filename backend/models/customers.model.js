@@ -86,3 +86,12 @@ export const archiveCustomer = async (id) => {
     throw err;
   }
 };
+
+export const getCustomerByEmail = async (email) => {
+  const query = `
+    CALL gs_schema.sp_get_customer_by_email($1, NULL);
+  `;
+
+  const { rows } = await db.query(query, [email]);
+  return rows[0]?.result ?? null;
+};

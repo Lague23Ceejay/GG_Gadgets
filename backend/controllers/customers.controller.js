@@ -44,19 +44,30 @@ export const create = async (req, res) => {
       return res.status(400).json({ error: 'full_name is required' });
     }
 
-    const customer = await CustomerModel.createCustomer({
-      full_name,
-      email,
-      phone,
-      metadata: metadata ?? {}
-    });
+    try {
+      const newId = await CustomerModel.createCustomer({
+        full_name,
+        email,
+        phone,
+        metadata: metadata ?? {}
+      });
 
-    return res.status(201).json({ customer_id: customer });
+      return res.status(201).json({ customer_id: newId });
+    } catch (err) {
+      if (err.code === '23505' && email) {
+        const existing = await CustomerModel.getCustomerByEmail(email);
+        if (existing) {
+          return res.status(200).json({ customer_id: existing.customer_id, existing: true });
+        }
+      }
+      throw err;
+    }
   } catch (err) {
     console.error('Error creating customer:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 export const update = async (req, res) => {
   try {
