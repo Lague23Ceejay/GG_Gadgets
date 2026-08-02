@@ -1,22 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { productsApi } from "@/lib/products";
-import type { Product } from "@/types";
+import { api } from "@/lib/api";
+import type { Product, Category } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
 
 export function Home() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    productsApi
-      .list()
-      .then(setProducts)
+    Promise.all([productsApi.list(), api.get<Category[]>("/categories")])
+      .then(([p, c]) => {
+        setProducts(p);
+        setCategories(c);
+      })
       .catch(() => setError("Couldn't load products. Check that the backend is running."))
       .finally(() => setLoading(false));
   }, []);
+
+  const filteredProducts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const matchesSearch =
+        !query ||
+        product.name.toLowerCase().includes(query) ||
+        (product.description ?? "").toLowerCase().includes(query);
+
+      const matchesCategory =
+        !activeCategory || (product.categories ?? []).includes(activeCategory);
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, search, activeCategory]);
 
   return (
     <div>
@@ -35,6 +58,44 @@ export function Home() {
         </div>
       </section>
 
+      {/* Search + category filter */}
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search products…"
+          className="max-w-sm"
+        />
+
+        {categories.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCategory(null)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-theme ${
+                activeCategory === null
+                  ? "bg-accent-500 text-white"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+              }`}
+            >
+              All
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.category_id}
+                onClick={() => setActiveCategory(cat.name)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-theme ${
+                  activeCategory === cat.name
+                    ? "bg-accent-500 text-white"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Product grid */}
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         {loading && <GridSkeleton />}
@@ -47,9 +108,13 @@ export function Home() {
           <p className="text-zinc-500">No products yet. Add some from the admin panel.</p>
         )}
 
-        {!loading && !error && products.length > 0 && (
+        {!loading && !error && products.length > 0 && filteredProducts.length === 0 && (
+          <p className="text-zinc-500">No products match your search.</p>
+        )}
+
+        {!loading && !error && filteredProducts.length > 0 && (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <ProductCard key={product.product_id} product={product} />
             ))}
           </div>

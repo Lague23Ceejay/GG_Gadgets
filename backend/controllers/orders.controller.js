@@ -37,6 +37,25 @@ export const create = async (req, res) => {
   res.status(201).json(order);
 };
 
+export const track = async (req, res) => {
+  const orderId = Number.parseInt(req.query.order_id, 10);
+  const email = req.query.email;
+
+  if (Number.isNaN(orderId) || !email) {
+    return res.status(400).json({ error: 'order_id and email are both required' });
+  }
+
+  const order = await OrderModel.trackOrder(orderId, email);
+
+  if (!order) {
+    // Deliberately vague — confirming "order exists but email is wrong" vs
+    // "order doesn't exist" would let someone probe for valid order numbers.
+    return res.status(404).json({ error: 'No matching order found. Check your order number and email.' });
+  }
+
+  res.json(order);
+};
+
 export const updateStatus = async (req, res) => {
   const id = Number.parseInt(req.params.id, 10);
   if (Number.isNaN(id)) {

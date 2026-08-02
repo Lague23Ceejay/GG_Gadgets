@@ -72,6 +72,16 @@ const OrderModel = {
     return rows[0]?.new_id ?? null;
   },
 
+  // ✅ Track Order
+  trackOrder: async (orderId, email) => {
+    const query = `
+      CALL gs_schema.sp_track_order($1, $2, NULL);
+    `;
+
+  const { rows } = await db.query(query, [orderId, email]);
+  return rows[0]?.result ?? null;
+},
+
   // ✅ Delete Order Item
   deleteOrderItem: async (id) => {
     const query = `

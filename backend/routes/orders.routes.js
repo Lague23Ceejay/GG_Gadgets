@@ -24,6 +24,7 @@ const CAN_ARCHIVE = requireRole('super_admin', 'store_manager');
 // =========================
 
 router.get('/', verifyToken, CAN_VIEW, controller.getAll);
+router.get('/track', controller.track);
 router.get('/:id', verifyToken, CAN_VIEW, validateNumeric('id'), controller.getOne);
 router.post('/', verifyToken, CAN_EDIT_ITEMS, validateOrder, controller.create);
 
