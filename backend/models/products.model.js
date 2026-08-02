@@ -86,13 +86,22 @@ export const archiveProduct = async (id) => {
 };
 
 // ✅ Add Product Image
-export const addProductImage = async (productId, imageUrl, isPrimary) => {
+export const addProductImage = async (productId, imageUrl, isPrimary, caption) => {
   const query = `
-    CALL gs_schema.sp_add_product_image($1, $2, $3, NULL);
+    CALL gs_schema.sp_add_product_image($1, $2, $3, $4, NULL);
   `;
 
-  const { rows } = await db.query(query, [productId, imageUrl, isPrimary ?? false]);
+  const { rows } = await db.query(query, [productId, imageUrl, isPrimary ?? false, caption ?? null]);
   return rows[0]?.new_id ?? null;
+};
+
+export const updateImageCaption = async (imageId, caption) => {
+  const query = `
+    CALL gs_schema.sp_update_product_image_caption($1, $2, NULL);
+  `;
+
+  const { rows } = await db.query(query, [imageId, caption]);
+  return rows[0]?.success ?? false;
 };
 
 // ✅ Get Product Images

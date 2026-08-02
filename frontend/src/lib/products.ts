@@ -11,11 +11,14 @@ export const productsApi = {
 
   // Images
   listImages: (productId: number) => api.get<ProductImage[]>(`/products/${productId}/images`),
-  addImage: (productId: number, imageUrl: string, isPrimary?: boolean) =>
+  addImage: (productId: number, imageUrl: string, isPrimary?: boolean, caption?: string) =>
     api.post<{ image_id: number }>(`/products/${productId}/images`, {
       image_url: imageUrl,
       is_primary: isPrimary ?? false,
+      caption: caption ?? null,
     }),
+  updateImageCaption: (imageId: number, caption: string) =>
+    api.put<{ success: boolean }>(`/products/images/${imageId}`, { caption }),
   deleteImage: (imageId: number) =>
     api.del<{ success: boolean }>(`/products/images/${imageId}`),
 };

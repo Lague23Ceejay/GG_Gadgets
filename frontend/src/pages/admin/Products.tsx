@@ -15,6 +15,7 @@ export function AdminProducts() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [specs, setSpecs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export function AdminProducts() {
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setSpecs([]);
     setError(null);
     setShowForm(true);
   };
@@ -44,23 +46,34 @@ export function AdminProducts() {
       price: String(product.price),
       stock: String(product.stock),
     });
+    const existingSpecs = product.attributes?.specifications;
+    setSpecs(Array.isArray(existingSpecs) ? (existingSpecs as string[]) : []);
     setError(null);
     setShowForm(true);
   };
+
+  const addSpecRow = () => setSpecs((prev) => [...prev, ""]);
+  const updateSpecRow = (index: number, value: string) =>
+    setSpecs((prev) => prev.map((s, i) => (i === index ? value : s)));
+  const removeSpecRow = (index: number) =>
+    setSpecs((prev) => prev.filter((_, i) => i !== index));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
-    const payload = {
+    const cleanedSpecs = specs.map((s) => s.trim()).filter(Boolean);
+
+    const payload: Record<string, unknown> = {
       name: form.name,
       description: form.description,
       price: Number(form.price),
       stock: Number(form.stock),
-      category_id: null,
-      attributes: {},
+      attributes: cleanedSpecs.length > 0 ? { specifications: cleanedSpecs } : {},
     };
+    // category_id intentionally omitted — the backend treats an explicit
+    // null as "invalid category", not "no category selected"
 
     try {
       if (editingId) {
@@ -96,7 +109,7 @@ export function AdminProducts() {
       {showForm && (
         <Card className="mt-4 p-5">
           <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
+            <div>
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
@@ -135,6 +148,32 @@ export function AdminProducts() {
                 value={form.stock}
                 onChange={(e) => setForm({ ...form, stock: e.target.value })}
               />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Label>Specifications</Label>
+              <div className="flex flex-col gap-2">
+                {specs.map((spec, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={spec}
+                      onChange={(e) => updateSpecRow(index, e.target.value)}
+                      placeholder="e.g. 16GB RAM, 512GB SSD"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSpecRow(index)}
+                      className="shrink-0 rounded-lg border border-zinc-300 px-3 text-sm text-zinc-500 hover:text-danger-500 dark:border-zinc-700"
+                      aria-label="Remove specification"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <Button type="button" variant="secondary" size="sm" onClick={addSpecRow} className="self-start">
+                  + Add spec
+                </Button>
+              </div>
             </div>
 
             {error && <p className="text-sm text-danger-500 sm:col-span-2">{error}</p>}
@@ -179,9 +218,7 @@ export function AdminProducts() {
             )}
             {products.map((product) => (
               <Fragment key={product.product_id}>
-                <tr
-                  className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
-                >
+                <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60">
                   <td className="px-4 py-3 font-medium">{product.name}</td>
                   <td className="px-4 py-3 font-mono">₱{Number(product.price).toFixed(2)}</td>
                   <td className="px-4 py-3">

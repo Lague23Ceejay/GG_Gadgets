@@ -88,6 +88,23 @@ export function ProductDetail() {
             )}
           </div>
 
+          {Array.isArray(product.attributes?.specifications) &&
+            (product.attributes.specifications as string[]).length > 0 && (
+              <div className="mt-6">
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+                  Specifications
+                </h3>
+                <ul className="flex flex-col gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+                  {(product.attributes.specifications as string[]).map((spec, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent-500" />
+                      {spec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
           <div className="mt-6 flex items-center gap-3">
             <div className="flex items-center rounded-lg border border-zinc-300 dark:border-zinc-700">
               <button

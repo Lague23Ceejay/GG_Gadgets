@@ -2,6 +2,7 @@ export interface ProductImage {
   image_id: number;
   image_url: string;
   is_primary: boolean;
+  caption: string | null;
   created_at: string;
 }
 

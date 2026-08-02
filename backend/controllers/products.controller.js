@@ -89,13 +89,27 @@ export const addImage = async (req, res) => {
     return res.status(400).json({ error: 'Invalid product id' });
   }
 
-  const { image_url, is_primary } = req.body || {};
+  const { image_url, is_primary, caption } = req.body || {};
   if (!image_url) {
     return res.status(400).json({ error: 'image_url is required' });
   }
 
-  const imageId = await ProductModel.addProductImage(productId, image_url, is_primary);
+  const imageId = await ProductModel.addProductImage(productId, image_url, is_primary, caption ?? null);
   res.status(201).json({ image_id: imageId });
+};
+
+export const updateImageCaption = async (req, res) => {
+  const mod = await import('../models/products.model.js');
+  const ProductModel = mod.default ?? mod;
+
+  const imageId = Number.parseInt(req.params.imageId, 10);
+  if (Number.isNaN(imageId)) {
+    return res.status(400).json({ error: 'Invalid image id' });
+  }
+
+  const { caption } = req.body || {};
+  const success = await ProductModel.updateImageCaption(imageId, caption ?? null);
+  res.json({ success });
 };
 
 export const deleteImage = async (req, res) => {

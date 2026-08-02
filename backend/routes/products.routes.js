@@ -65,6 +65,14 @@ router.delete(
   controller.deleteImage
 );
 
+// UPDATE an image's caption (super_admin + store_manager)
+router.put(
+  '/images/:imageId',
+  verifyToken,
+  requireRole('super_admin', 'store_manager'),
+  controller.updateImageCaption
+);
+
 // =========================
 // PRODUCT <-> CATEGORY LINKS
 // =========================
