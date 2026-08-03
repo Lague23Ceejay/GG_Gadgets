@@ -14,7 +14,7 @@ export function StorefrontLayout() {
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm font-medium sm:flex">
-            <Link to="/" className="hover:text-accent-500 transition-theme">
+            <Link to="/shop" className="hover:text-accent-500 transition-theme">
               Shop
             </Link>
             <Link to="/track-order" className="hover:text-accent-500 transition-theme">

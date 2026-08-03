@@ -15,6 +15,7 @@ import { AdminOrders } from "@/pages/admin/Orders";
 import { AdminInventory } from "@/pages/admin/Inventory";
 import { AdminUsers } from "@/pages/admin/Users";
 import { TrackOrder } from "@/pages/storefront/TrackOrder";
+import { Shop } from "@/pages/storefront/Shop";
 
 export function App() {
   return (
@@ -24,6 +25,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/shop" element={<Shop />} />
         <Route path="/track-order" element={<TrackOrder />} />
       </Route>
 

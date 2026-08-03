@@ -7,7 +7,7 @@ import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { ProductImageManager } from "@/pages/admin/ProductImageManager";
 
-const emptyForm = { name: "", description: "", price: "", stock: "" };
+const emptyForm = { name: "", description: "", price: "", stock: "", featured: false, salePrice: "" };
 
 export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -45,6 +45,11 @@ export function AdminProducts() {
       description: product.description ?? "",
       price: String(product.price),
       stock: String(product.stock),
+      featured: product.attributes?.featured === true,
+    salePrice:
+      typeof product.attributes?.sale_price === "number"
+        ? String(product.attributes.sale_price)
+        : "",
     });
     const existingSpecs = product.attributes?.specifications;
     setSpecs(Array.isArray(existingSpecs) ? (existingSpecs as string[]) : []);
@@ -70,7 +75,12 @@ export function AdminProducts() {
       description: form.description,
       price: Number(form.price),
       stock: Number(form.stock),
-      attributes: cleanedSpecs.length > 0 ? { specifications: cleanedSpecs } : {},
+      attributes: {
+        featured: form.featured,
+        sale_price: form.salePrice ? Number(form.salePrice) : null,
+      },
+      ...
+      cleanedSpecs.length > 0 ? { specifications: cleanedSpecs } : {},
     };
     // category_id intentionally omitted — the backend treats an explicit
     // null as "invalid category", not "no category selected"
@@ -138,7 +148,31 @@ export function AdminProducts() {
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
               />
             </div>
-            <div>
+              <div>
+                  <Label htmlFor="salePrice">Sale price (optional)</Label>
+                  <Input
+                    id="salePrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.salePrice}
+                    onChange={(e) => setForm({ ...form, salePrice: e.target.value })}
+                    placeholder="Leave blank for no discount"
+                  />
+                </div>
+                <div className="flex items-center gap-2 sm:col-span-2">
+                  <input
+                    id="featured"
+                    type="checkbox"
+                    checked={form.featured}
+                    onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                    className="h-4 w-4 rounded border-zinc-300 text-accent-500 dark:border-zinc-700"
+                  />
+                  <Label htmlFor="featured" className="mb-0">
+                    Feature on homepage (Best Sellers)
+                  </Label>
+                </div>
+              <div>
               <Label htmlFor="stock">Stock</Label>
               <Input
                 id="stock"
@@ -219,7 +253,15 @@ export function AdminProducts() {
             {products.map((product) => (
               <Fragment key={product.product_id}>
                 <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60">
-                  <td className="px-4 py-3 font-medium">{product.name}</td>
+                  <td className="px-4 py-3 font-medium">
+                    {product.name}
+                    {product.attributes?.featured === true && (
+                      <Badge tone="accent" className="ml-2">Featured</Badge>
+                    )}
+                    {typeof product.attributes?.sale_price === "number" && (
+                      <Badge tone="spark" className="ml-2">Sale</Badge>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-mono">₱{Number(product.price).toFixed(2)}</td>
                   <td className="px-4 py-3">
                     {product.stock === 0 ? (
