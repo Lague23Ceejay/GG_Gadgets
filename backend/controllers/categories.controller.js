@@ -42,7 +42,7 @@ export const create = async (req, res) => {
     // Stored procedure returns full object
     const category = await CategoryModel.createCategory(req.body);
 
-    return res.status(201).json(category);
+    return res.status(201).json({ category_id: category });
   } catch (err) {
     console.error('Error creating category:', err);
     return res.status(500).json({ error: 'Internal server error' });

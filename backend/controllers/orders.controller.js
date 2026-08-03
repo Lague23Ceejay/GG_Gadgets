@@ -34,7 +34,7 @@ export const create = async (req, res) => {
 
   const order = await OrderModel.createOrder(payload);
 
-  res.status(201).json(order);
+  res.status(201).json({ order_id: order });
 };
 
 export const track = async (req, res) => {
