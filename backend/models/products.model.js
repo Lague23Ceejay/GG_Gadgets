@@ -57,10 +57,10 @@ export const updateProduct = async (id, payload) => {
   } = payload;
 
   const query = `
-    CALL gs_schema.sp_update_product(
-      $1, $2, $3, $4, $5, $6, NULL
-    );
-  `;
+  CALL gs_schema.sp_update_product(
+    $1, $2, $3, $4, $5, $6, $7, NULL
+  );
+`;
 
   const { rows } = await db.query(query, [
     id,

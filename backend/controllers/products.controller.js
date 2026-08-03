@@ -35,18 +35,23 @@ export const create = async (req, res) => {
 };
 
 export const update = async (req, res) => {
-  const mod = await import('../models/products.model.js');
-  const ProductModel = mod.default ?? mod;
-  const payload = req.validatedProduct ?? req.body;
+  try {
+    const mod = await import('../models/products.model.js');
+    const ProductModel = mod.default ?? mod;
+    const payload = req.validatedProduct ?? req.body;
 
-  const id = Number.parseInt(req.params.id, 10);
-  if (Number.isNaN(id)) {
-    return res.status(400).json({ error: 'Invalid product id' });
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid product id' });
+    }
+
+    const success = await ProductModel.updateProduct(id, payload);
+
+    res.json({ success });
+  } catch (err) {
+    console.error('Error updating product:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  const success = await ProductModel.updateProduct(id, payload);
-
-  res.json({ success });
 };
 
 export const archive = async (req, res) => {
