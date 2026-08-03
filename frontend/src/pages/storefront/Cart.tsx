@@ -15,6 +15,7 @@ export function Cart() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const hasOutOfStockItems = lines.some((line) => line.product.stock === 0);
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,9 +93,16 @@ export function Cart() {
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <h1 className="font-display text-2xl font-700">Your cart</h1>
 
+    
       <div className="mt-6 flex flex-col gap-3">
         {lines.map((line) => (
-          <Card key={line.product.product_id} className="flex items-center gap-4 p-4">
+          <Card
+            key={line.product.product_id}
+            className={`flex items-center gap-4 p-4 ${line.product.stock === 0 ? "opacity-50" : ""}`}
+          >
+            {line.product.stock === 0 && (
+              <span className="text-xs font-medium text-danger-500">Out of stock</span>
+            )}
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
               {line.product.images?.[0] && (
                 <img
@@ -134,8 +142,13 @@ export function Cart() {
       </div>
 
       {!showCheckout ? (
-        <Button size="lg" className="mt-6 w-full" onClick={() => setShowCheckout(true)}>
-          Proceed to checkout
+        <Button
+          size="lg"
+          className="mt-6 w-full"
+          onClick={() => setShowCheckout(true)}
+          disabled={hasOutOfStockItems}
+        >
+          {hasOutOfStockItems ? "Remove out-of-stock items to continue" : "Proceed to checkout"}
         </Button>
       ) : (
         <Card className="mt-6 p-5">

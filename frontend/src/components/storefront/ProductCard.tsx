@@ -26,10 +26,12 @@ export function ProductCard({ product }: { product: Product }) {
               <PlaceholderIcon />
             </div>
           )}
-          {hasSale && (
-            <Badge tone="spark" className="absolute left-2 top-2">
-              Sale
-            </Badge>
+            {hasSale && (
+              <Badge tone="spark" className="absolute left-2 top-2">
+                {typeof product.attributes?.discount_percent === "number"
+                  ? `-${product.attributes.discount_percent}%`
+                  : "Sale"}
+              </Badge>
           )}
         </div>
 

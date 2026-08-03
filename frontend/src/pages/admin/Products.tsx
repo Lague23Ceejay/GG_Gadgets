@@ -7,7 +7,17 @@ import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { ProductImageManager } from "@/pages/admin/ProductImageManager";
 
-const emptyForm = { name: "", description: "", price: "", stock: "", featured: false, salePrice: "" };
+type DiscountType = "none" | "flat" | "percent";
+
+const emptyForm = {
+  name: "",
+  description: "",
+  price: "",
+  stock: "",
+  featured: false,
+  discountType: "none" as DiscountType,
+  discountValue: "",
+};
 
 export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,17 +50,24 @@ export function AdminProducts() {
 
   const openEdit = (product: Product) => {
     setEditingId(product.product_id);
+
+    const salePrice = product.attributes?.sale_price as number | undefined;
+    const discountPercent = product.attributes?.discount_percent as number | undefined;
+
     setForm({
       name: product.name,
       description: product.description ?? "",
       price: String(product.price),
       stock: String(product.stock),
       featured: product.attributes?.featured === true,
-    salePrice:
-      typeof product.attributes?.sale_price === "number"
-        ? String(product.attributes.sale_price)
-        : "",
+      discountType: discountPercent ? "percent" : salePrice ? "flat" : "none",
+      discountValue: discountPercent
+        ? String(discountPercent)
+        : salePrice
+          ? String(salePrice)
+          : "",
     });
+
     const existingSpecs = product.attributes?.specifications;
     setSpecs(Array.isArray(existingSpecs) ? (existingSpecs as string[]) : []);
     setError(null);
@@ -70,17 +87,26 @@ export function AdminProducts() {
 
     const cleanedSpecs = specs.map((s) => s.trim()).filter(Boolean);
 
+    const attributes: Record<string, unknown> = { featured: form.featured };
+
+    if (form.discountType === "flat" && form.discountValue.trim()) {
+      attributes.sale_price = Number(form.discountValue);
+    } else if (form.discountType === "percent" && form.discountValue.trim()) {
+      const pct = Number(form.discountValue);
+      attributes.discount_percent = pct;
+      attributes.sale_price = Number((Number(form.price) * (1 - pct / 100)).toFixed(2));
+    }
+
+    if (cleanedSpecs.length > 0) {
+      attributes.specifications = cleanedSpecs;
+    }
+
     const payload: Record<string, unknown> = {
       name: form.name,
       description: form.description,
       price: Number(form.price),
       stock: Number(form.stock),
-      attributes: {
-        featured: form.featured,
-        sale_price: form.salePrice ? Number(form.salePrice) : null,
-      },
-      ...
-      cleanedSpecs.length > 0 ? { specifications: cleanedSpecs } : {},
+      attributes,
     };
     // category_id intentionally omitted — the backend treats an explicit
     // null as "invalid category", not "no category selected"
@@ -148,31 +174,7 @@ export function AdminProducts() {
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
               />
             </div>
-              <div>
-                  <Label htmlFor="salePrice">Sale price (optional)</Label>
-                  <Input
-                    id="salePrice"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={form.salePrice}
-                    onChange={(e) => setForm({ ...form, salePrice: e.target.value })}
-                    placeholder="Leave blank for no discount"
-                  />
-                </div>
-                <div className="flex items-center gap-2 sm:col-span-2">
-                  <input
-                    id="featured"
-                    type="checkbox"
-                    checked={form.featured}
-                    onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                    className="h-4 w-4 rounded border-zinc-300 text-accent-500 dark:border-zinc-700"
-                  />
-                  <Label htmlFor="featured" className="mb-0">
-                    Feature on homepage (Best Sellers)
-                  </Label>
-                </div>
-              <div>
+            <div>
               <Label htmlFor="stock">Stock</Label>
               <Input
                 id="stock"
@@ -182,6 +184,56 @@ export function AdminProducts() {
                 value={form.stock}
                 onChange={(e) => setForm({ ...form, stock: e.target.value })}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="discountType">Discount</Label>
+              <select
+                id="discountType"
+                value={form.discountType}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    discountType: e.target.value as DiscountType,
+                    discountValue: "",
+                  })
+                }
+                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <option value="none">No discount</option>
+                <option value="flat">Flat sale price</option>
+                <option value="percent">Percentage off</option>
+              </select>
+            </div>
+
+            {form.discountType !== "none" && (
+              <div>
+                <Label htmlFor="discountValue">
+                  {form.discountType === "percent" ? "Percent off (e.g. 30)" : "Sale price"}
+                </Label>
+                <Input
+                  id="discountValue"
+                  type="number"
+                  step={form.discountType === "percent" ? "1" : "0.01"}
+                  min="0"
+                  max={form.discountType === "percent" ? "100" : undefined}
+                  value={form.discountValue}
+                  onChange={(e) => setForm({ ...form, discountValue: e.target.value })}
+                />
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 sm:col-span-2">
+              <input
+                id="featured"
+                type="checkbox"
+                checked={form.featured}
+                onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                className="h-4 w-4 rounded border-zinc-300 text-accent-500 dark:border-zinc-700"
+              />
+              <Label htmlFor="featured" className="mb-0">
+                Feature on homepage (Best Sellers)
+              </Label>
             </div>
 
             <div className="sm:col-span-2">
@@ -259,7 +311,11 @@ export function AdminProducts() {
                       <Badge tone="accent" className="ml-2">Featured</Badge>
                     )}
                     {typeof product.attributes?.sale_price === "number" && (
-                      <Badge tone="spark" className="ml-2">Sale</Badge>
+                      <Badge tone="spark" className="ml-2">
+                        {typeof product.attributes?.discount_percent === "number"
+                          ? `-${product.attributes.discount_percent}%`
+                          : "Sale"}
+                      </Badge>
                     )}
                   </td>
                   <td className="px-4 py-3 font-mono">₱{Number(product.price).toFixed(2)}</td>
