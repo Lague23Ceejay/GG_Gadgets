@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { productsApi } from "@/lib/products";
 import type { Product } from "@/types";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
+import { EventsCarousel } from "@/components/storefront/EventsCarousel";
 
 export function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -80,6 +81,7 @@ export function Home() {
           </p>
         </section>
       )}
+      <EventsCarousel />
 
       {!loading && !error && (featured.length > 0 || onSale.length > 0) && (
         <section className="mx-auto max-w-6xl px-4 pb-16 text-center sm:px-6">

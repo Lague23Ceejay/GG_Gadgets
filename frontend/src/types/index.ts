@@ -72,3 +72,15 @@ export interface CartLine {
   product: Product;
   quantity: number;
 }
+
+export interface PromoEvent {
+  event_id: number;
+  title: string;
+  description: string | null;
+  image_url: string;
+  discount_percent: number | null;
+  link_url: string | null;
+  is_active?: boolean;
+  created_at: string;
+  updated_at?: string;
+}
