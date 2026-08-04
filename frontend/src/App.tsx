@@ -16,6 +16,7 @@ import { AdminInventory } from "@/pages/admin/Inventory";
 import { AdminUsers } from "@/pages/admin/Users";
 import { TrackOrder } from "@/pages/storefront/TrackOrder";
 import { Shop } from "@/pages/storefront/Shop";
+import { AdminPromoEvents } from "@/pages/admin/PromoEvents";
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
         <Route path="/track-order" element={<TrackOrder />} />
       </Route>
 
+
       {/* Admin auth */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
@@ -41,6 +43,14 @@ export function App() {
           </ProtectedRoute>
         }
       >
+          <Route
+              path="events"
+              element={
+                <RoleRoute allowedRoles={["super_admin", "store_manager"]}>
+                  <AdminPromoEvents />
+                </RoleRoute>
+              }
+            />
         {/* Dashboard, Orders, Inventory: visible to all three roles.
             The backend still enforces per-action limits (e.g. Fulfillment
             can update order status but not archive it) — this route-level

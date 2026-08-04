@@ -12,6 +12,7 @@ const NAV_ITEMS: { to: string; label: string; end?: boolean; roles: Role[] }[] =
   { to: "/admin/orders", label: "Orders", roles: ["super_admin", "store_manager", "fulfillment"] },
   { to: "/admin/inventory", label: "Inventory", roles: ["super_admin", "store_manager", "fulfillment"] },
   { to: "/admin/users", label: "Staff accounts", roles: ["super_admin"] },
+  { to: "/admin/events", label: "Homepage events", roles: ["super_admin", "store_manager"] },
 ];
 
 export function AdminLayout() {
