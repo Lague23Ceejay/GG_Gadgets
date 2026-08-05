@@ -7,6 +7,7 @@ import { Input, Label } from "@/components/ui/Input";
 import { api } from "@/lib/api";
 import { ordersApi } from "@/lib/orders";
 import type { Customer } from "@/types";
+import { getEffectivePrice, hasActiveSale } from "@/lib/pricing";
 
 export function Cart() {
   const { lines, setQuantity, removeItem, subtotal, clear } = useCart();
@@ -34,7 +35,7 @@ export function Cart() {
           order_id: order.order_id,
           product_id: line.product.product_id,
           quantity: line.quantity,
-          price_each: Number(line.product.price),
+          price_each: getEffectivePrice(line.product),
         });
       }
 
@@ -115,8 +116,13 @@ export function Cart() {
             <div className="flex-1">
               <p className="font-medium">{line.product.name}</p>
               <p className="font-mono text-sm text-zinc-500">
-                ₱{Number(line.product.price).toFixed(2)}
-              </p>
+              ₱{getEffectivePrice(line.product).toFixed(2)}
+              {hasActiveSale(line.product) && (
+                <span className="ml-1.5 text-xs text-zinc-400 line-through">
+                  ₱{Number(line.product.price).toFixed(2)}
+                </span>
+              )}
+            </p>
             </div>
             <input
               type="number"

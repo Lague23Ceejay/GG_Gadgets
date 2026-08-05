@@ -5,6 +5,7 @@ import type { Product } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { useCart } from "@/context/CartContext";
+import { getEffectivePrice, hasActiveSale } from "@/lib/pricing";
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -72,7 +73,21 @@ export function ProductDetail() {
           )}
 
           <h1 className="font-display text-2xl font-700 tracking-tight sm:text-3xl">{product.name}</h1>
-          <p className="mt-3 font-mono text-2xl font-semibold">₱{Number(product.price).toFixed(2)}</p>
+          {hasActiveSale(product) ? (
+            <div className="mt-3 flex items-baseline gap-2">
+              <p className="font-mono text-2xl font-semibold text-danger-500">
+                ₱{getEffectivePrice(product).toFixed(2)}
+              </p>
+              <p className="font-mono text-lg text-zinc-400 line-through">
+                ₱{Number(product.price).toFixed(2)}
+              </p>
+              {typeof product.attributes?.discount_percent === "number" && (
+                <Badge tone="spark">-{product.attributes.discount_percent}%</Badge>
+              )}
+            </div>
+          ) : (
+            <p className="mt-3 font-mono text-2xl font-semibold">₱{Number(product.price).toFixed(2)}</p>
+          )}
 
           {product.description && (
             <p className="mt-4 text-zinc-600 dark:text-zinc-400">{product.description}</p>

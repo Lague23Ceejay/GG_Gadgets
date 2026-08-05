@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { CartLine, Product } from "@/types";
+import { getEffectivePrice } from "@/lib/pricing";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -60,7 +61,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clear = () => setLines([]);
 
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
-  const subtotal = lines.reduce((sum, l) => sum + l.quantity * Number(l.product.price), 0);
+  const subtotal = lines.reduce((sum, l) => sum + l.quantity * getEffectivePrice(l.product), 0);
 
   return (
     <CartContext.Provider

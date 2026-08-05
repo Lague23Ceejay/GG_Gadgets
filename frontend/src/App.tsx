@@ -1,3 +1,4 @@
+// frontend/src/App.tsx
 import { Routes, Route } from "react-router-dom";
 import { StorefrontLayout } from "@/components/layout/StorefrontLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
@@ -35,16 +36,6 @@ export function App() {
       <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* Admin (protected) */}
-
-      <Route
-        path="staff-logs"
-        element={
-          <RoleRoute allowedRoles={["super_admin"]}>
-            <StaffLogs />
-          </RoleRoute>
-        }
-      />
-
       <Route
         path="/admin"
         element={
@@ -61,6 +52,16 @@ export function App() {
                 </RoleRoute>
               }
             />
+
+            <Route
+        path="staff-logs"
+        element={
+          <RoleRoute allowedRoles={["super_admin"]}>
+            <StaffLogs />
+          </RoleRoute>
+        }
+      />
+
         {/* Dashboard, Orders, Inventory: visible to all three roles.
             The backend still enforces per-action limits (e.g. Fulfillment
             can update order status but not archive it) — this route-level
