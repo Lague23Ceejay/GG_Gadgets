@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import pool from "./config/db.js";
 import promoEventsRoutes from "./routes/promoEvents.routes.js";
+import activityLogRoutes from "./routes/activityLog.routes.js";
 
 const app = express();
 
@@ -9,6 +10,8 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/v1/promo-events", promoEventsRoutes);
 console.log("✅ Mounted routes: /api/v1/promo-events");
+app.use("/api/v1/activity-logs", activityLogRoutes);
+console.log("✅ Mounted routes: /api/v1/activity-logs");
 
 // Health check
 app.get("/", (req, res) => res.json({ status: "ok" }));

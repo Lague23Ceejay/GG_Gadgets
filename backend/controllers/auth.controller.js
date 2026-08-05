@@ -1,6 +1,7 @@
 // controllers/authController.js
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { logActivity } from "../models/activityLog.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 

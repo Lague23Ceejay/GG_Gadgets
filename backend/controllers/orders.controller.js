@@ -1,4 +1,5 @@
 import OrderModel from '../models/orders.model.js';
+import { logActivity } from "../models/activityLog.model.js";
 
 export const getAll = async (req, res) => {
   const data = await OrderModel.getAllOrders();

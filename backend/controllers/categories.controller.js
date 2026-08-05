@@ -1,3 +1,5 @@
+import { logActivity } from "../models/activityLog.model.js";
+
 export const getAll = async (req, res) => {
   try {
     const mod = await import('../models/categories.model.js');

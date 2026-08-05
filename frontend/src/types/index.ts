@@ -84,3 +84,13 @@ export interface PromoEvent {
   created_at: string;
   updated_at?: string;
 }
+
+export interface ActivityLog {
+  log_id: number;
+  user_id: number | null;
+  username: string;
+  role: string;
+  action: string;
+  details: Record<string, unknown>;
+  created_at: string;
+}

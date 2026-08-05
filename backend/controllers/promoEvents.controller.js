@@ -1,4 +1,5 @@
 import * as EventModel from "../models/promoEvents.model.js";
+import { logActivity } from "../models/activityLog.model.js";
 
 export const getActive = async (req, res) => {
   try {

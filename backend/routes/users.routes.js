@@ -9,5 +9,6 @@ const router = express.Router();
 router.get("/", verifyToken, requireRole("super_admin"), UsersController.getAll);
 router.get("/:id", verifyToken, requireRole("super_admin"), UsersController.getById);
 router.delete("/:id", verifyToken, requireRole("super_admin"), UsersController.archive);
+router.put("/:id", verifyToken, requireRole("super_admin"), UsersController.update);
 
 export default router;

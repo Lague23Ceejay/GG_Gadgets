@@ -27,6 +27,14 @@ export function AdminUsers() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const openEdit = (user: AdminUserRow) => {
+  setEditingId(user.user_id);
+  setForm({ username: user.username, password: "", role: user.role });
+  setError(null);
+  setShowForm(true);
+};
 
   const load = () => {
     setLoading(true);
@@ -38,22 +46,27 @@ export function AdminUsers() {
 
   useEffect(load, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
     try {
-      await api.post("/auth/register", form);
-      setShowForm(false);
-      setForm(emptyForm);
-      load();
+        if (editingId) {
+        await api.put(`/users/${editingId}`, form);
+        } else {
+        await api.post("/auth/register", form);
+        }
+        setShowForm(false);
+        setForm(emptyForm);
+        setEditingId(null);
+        load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create account.");
+        setError(err instanceof Error ? err.message : "Failed to save account.");
     } finally {
-      setSubmitting(false);
+        setSubmitting(false);
     }
-  };
+    };
 
   const handleArchive = async (id: number) => {
     if (!confirm("Archive this account? They will no longer be able to log in.")) return;
@@ -68,7 +81,9 @@ export function AdminUsers() {
           <h1 className="font-display text-2xl font-700">Staff accounts</h1>
           <p className="mt-1 text-sm text-zinc-500">{users.length} total — Super Admin only</p>
         </div>
-        <Button onClick={() => setShowForm(true)}>+ New account</Button>
+            <Button onClick={() => { setEditingId(null); setForm(emptyForm); setShowForm(true); }}>
+                + New account
+            </Button>
       </div>
 
       {showForm && (
@@ -84,15 +99,16 @@ export function AdminUsers() {
               />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
+              <Label htmlFor="password">{editingId ? "New password (optional)" : "Password"}</Label>
+                <Input
                 id="password"
                 type="password"
-                required
+                required={!editingId}
                 minLength={8}
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
+                placeholder={editingId ? "Leave blank to keep current password" : undefined}
+                />
             </div>
             <div>
               <Label htmlFor="role">Role</Label>
@@ -152,6 +168,9 @@ export function AdminUsers() {
                   >
                     Archive
                   </button>
+                  <button onClick={() => openEdit(u)} className="mr-3 text-accent-500 hover:underline">
+                    Edit
+                    </button>
                 </td>
               </tr>
             ))}

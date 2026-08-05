@@ -50,3 +50,13 @@ export const archiveUser = async (id) => {
   const { rows } = await db.query(query, [id]);
   return rows[0]?.success ?? false;
 };
+
+// ✅ Update User
+export const updateUser = async ({ user_id, username, password_hash, role }) => {
+  const query = `
+    CALL gs_schema.sp_update_user($1, $2, $3, $4, NULL);
+  `;
+
+  const { rows } = await db.query(query, [user_id, username, password_hash ?? null, role]);
+  return rows[0]?.success ?? false;
+};

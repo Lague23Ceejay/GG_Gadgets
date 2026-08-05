@@ -1,3 +1,5 @@
+import { logActivity } from "../models/activityLog.model.js";
+
 export const getAll = async (req, res) => {
   const mod = await import('../models/products.model.js');
   const ProductModel = mod.default ?? mod;
@@ -32,6 +34,8 @@ export const create = async (req, res) => {
   const newProductId = await ProductModel.createProduct(payload);
 
   res.status(201).json({ product_id: newProductId });
+
+  logActivity(req.user, "Created product", { product_id: newProductId, name: payload.name });
 };
 
 export const update = async (req, res) => {
@@ -48,6 +52,8 @@ export const update = async (req, res) => {
     const success = await ProductModel.updateProduct(id, payload);
 
     res.json({ success });
+    logActivity(req.user, "Updated product", { product_id: id, name: payload.name });
+
   } catch (err) {
     console.error('Error updating product:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -66,6 +72,7 @@ export const archive = async (req, res) => {
   const success = await ProductModel.archiveProduct(id);
 
   res.json({ success });
+  logActivity(req.user, "Archived order", { order_id: id });
 };
 
 // =========================

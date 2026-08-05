@@ -1,3 +1,5 @@
+import { logActivity } from "../models/activityLog.model.js";
+
 // dynamic model import to avoid ESM/CJS startup import issues
 
 export const getAll = async (req, res) => {

@@ -1,3 +1,5 @@
+import { logActivity } from "../models/activityLog.model.js";
+
 export const getAll = async (req, res) => {
   try {
     const mod = await import('../models/inventory.model.js');
@@ -33,6 +35,7 @@ export const getLogs = async (req, res) => {
 export const create = async (req, res) => {
   try {
     const { product_id, change_amount, reason } = req.body || {};
+    
 
     if (!product_id || !change_amount || !reason) {
       return res.status(400).json({
@@ -42,6 +45,8 @@ export const create = async (req, res) => {
 
     const mod = await import('../models/inventory.model.js');
     const InventoryModel = mod.default ?? mod;
+
+    logActivity(req.user, "Manual inventory adjustment", { product_id, change_amount, reason });
 
     // Stored procedure only accepts product_id, change_amount, reason
     const log = await InventoryModel.createLog({
