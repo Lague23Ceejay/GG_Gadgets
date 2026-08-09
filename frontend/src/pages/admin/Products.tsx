@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { productsApi } from "@/lib/products";
-import type { Product } from "@/types";
+import { api } from "@/lib/api";
+import type { Product, Category } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
@@ -21,20 +22,25 @@ const emptyForm = {
 
 export function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [specs, setSpecs] = useState<string[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [originalCategoryIds, setOriginalCategoryIds] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const load = () => {
     setLoading(true);
-    productsApi
-      .list()
-      .then(setProducts)
+    Promise.all([productsApi.list(), api.get<Category[]>("/categories")])
+      .then(([p, c]) => {
+        setProducts(p);
+        setCategories(c);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -44,6 +50,8 @@ export function AdminProducts() {
     setEditingId(null);
     setForm(emptyForm);
     setSpecs([]);
+    setSelectedCategoryIds([]);
+    setOriginalCategoryIds([]);
     setError(null);
     setShowForm(true);
   };
@@ -68,10 +76,20 @@ export function AdminProducts() {
           : "",
     });
 
+    const existingIds = (product.categories ?? []).map((c) => c.category_id);
+    setSelectedCategoryIds(existingIds);
+    setOriginalCategoryIds(existingIds);
+
     const existingSpecs = product.attributes?.specifications;
     setSpecs(Array.isArray(existingSpecs) ? (existingSpecs as string[]) : []);
     setError(null);
     setShowForm(true);
+  };
+
+  const toggleCategory = (categoryId: number) => {
+    setSelectedCategoryIds((prev) =>
+      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId]
+    );
   };
 
   const addSpecRow = () => setSpecs((prev) => [...prev, ""]);
@@ -108,15 +126,30 @@ export function AdminProducts() {
       stock: Number(form.stock),
       attributes,
     };
-    // category_id intentionally omitted — the backend treats an explicit
-    // null as "invalid category", not "no category selected"
+    // category_id intentionally omitted — categories are now managed as a
+    // many-to-many set via the separate assign/remove endpoints below,
+    // not through the single category_id param on create/update.
 
     try {
+      let productId = editingId;
+
       if (editingId) {
         await productsApi.update(editingId, payload);
       } else {
-        await productsApi.create(payload);
+        const created = await productsApi.create(payload);
+        productId = created.product_id;
       }
+
+      if (productId) {
+        const toAdd = selectedCategoryIds.filter((id) => !originalCategoryIds.includes(id));
+        const toRemove = originalCategoryIds.filter((id) => !selectedCategoryIds.includes(id));
+
+        await Promise.all([
+          ...toAdd.map((id) => productsApi.assignCategory(productId!, id)),
+          ...toRemove.map((id) => productsApi.removeCategory(productId!, id)),
+        ]);
+      }
+
       setShowForm(false);
       load();
     } catch (err) {
@@ -154,6 +187,37 @@ export function AdminProducts() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </div>
+
+            <div>
+              <Label>Categories</Label>
+              {categories.length === 0 ? (
+                <p className="text-xs text-zinc-500">
+                  No categories yet — create one in the Categories tab first.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat) => {
+                    const isSelected = selectedCategoryIds.includes(cat.category_id);
+                    return (
+                      <button
+                        key={cat.category_id}
+                        type="button"
+                        onClick={() => toggleCategory(cat.category_id)}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition-theme ${
+                          isSelected
+                            ? "border-accent-500 bg-accent-50 text-accent-700 dark:bg-accent-500/15 dark:text-accent-300"
+                            : "border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        {isSelected ? "✓ " : ""}
+                        {cat.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <div className="sm:col-span-2">
               <Label htmlFor="description">Description</Label>
               <Input
@@ -281,6 +345,7 @@ export function AdminProducts() {
           <thead className="border-b border-zinc-200 text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800">
             <tr>
               <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Categories</th>
               <th className="px-4 py-3">Price</th>
               <th className="px-4 py-3">Stock</th>
               <th className="px-4 py-3">Images</th>
@@ -290,14 +355,14 @@ export function AdminProducts() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={6} className="px-4 py-6 text-center text-zinc-500">
                   Loading…
                 </td>
               </tr>
             )}
             {!loading && products.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={6} className="px-4 py-6 text-center text-zinc-500">
                   No products yet. Create your first one above.
                 </td>
               </tr>
@@ -317,6 +382,11 @@ export function AdminProducts() {
                           : "Sale"}
                       </Badge>
                     )}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-500">
+                    {product.categories && product.categories.length > 0
+                      ? product.categories.map((c) => c.name).join(", ")
+                      : "—"}
                   </td>
                   <td className="px-4 py-3 font-mono">₱{Number(product.price).toFixed(2)}</td>
                   <td className="px-4 py-3">
@@ -356,7 +426,7 @@ export function AdminProducts() {
 
                 {expandedId === product.product_id && (
                   <tr className="bg-zinc-50 dark:bg-zinc-900/50">
-                    <td colSpan={5} className="px-4 py-4">
+                    <td colSpan={6} className="px-4 py-4">
                       <ProductImageManager productId={product.product_id} />
                     </td>
                   </tr>

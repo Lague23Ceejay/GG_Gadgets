@@ -65,8 +65,8 @@ export function ProductDetail() {
           {product.categories && product.categories.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-1.5">
               {product.categories.map((cat) => (
-                <Badge key={cat} tone="accent">
-                  {cat}
+                 <Badge key={cat.category_id} tone="accent">
+                  {cat.name}
                 </Badge>
               ))}
             </div>

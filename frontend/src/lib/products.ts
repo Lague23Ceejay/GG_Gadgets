@@ -2,6 +2,10 @@ import { api } from "./api";
 import type { Product, ProductImage } from "@/types";
 
 export const productsApi = {
+  assignCategory: (productId: number, categoryId: number) =>
+    api.post<{ success: boolean }>(`/products/${productId}/categories`, { category_id: categoryId }),
+  removeCategory: (productId: number, categoryId: number) =>
+    api.del<{ success: boolean }>(`/products/${productId}/categories/${categoryId}`),
   list: () => api.get<Product[]>("/products"),
   getById: (id: number) => api.get<Product>(`/products/${id}`),
   create: (payload: Partial<Product>) => api.post<{ product_id: number }>("/products", payload),

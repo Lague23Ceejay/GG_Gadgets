@@ -13,7 +13,7 @@ export interface Product {
   price: number;
   stock: number;
   attributes: Record<string, unknown>;
-  categories?: string[];
+  categories?: { category_id: number; name: string }[]; // was: string[]
   images?: ProductImage[];
   created_at: string;
   updated_at: string;

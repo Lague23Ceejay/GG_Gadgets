@@ -33,7 +33,7 @@ export function Shop() {
         (product.description ?? "").toLowerCase().includes(query);
 
       const matchesCategory =
-        !activeCategory || (product.categories ?? []).includes(activeCategory);
+        !activeCategory || (product.categories ?? []).some((c) => c.name === activeCategory);
 
       return matchesSearch && matchesCategory;
     });
