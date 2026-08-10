@@ -20,5 +20,7 @@ router.put('/:id', verifyToken, requireRole('super_admin', 'store_manager'), val
 
 // ARCHIVE customer (admin-only)
 router.delete('/:id', verifyToken, requireRole('super_admin', 'store_manager'), validateNumeric('id'), controller.archive);
+// GET customer summary (admin-only)
+router.get('/:id/summary', verifyToken, requireRole('super_admin', 'store_manager'), validateNumeric('id'), controller.getSummary);
 
 export default router;

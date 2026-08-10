@@ -1,3 +1,4 @@
+// This file contains TypeScript type definitions for the GG Gadgets project. It defines interfaces for products, categories, customers, orders, admin users, cart lines, promo events, activity logs, order history items, customer order history, and public settings. These types are used throughout the frontend and backend code to ensure type safety and consistency when working with data related to the e-commerce platform.
 export interface ProductImage {
   image_id: number;
   image_url: string;
@@ -59,6 +60,7 @@ export interface Order {
   items?: OrderItem[];
   created_at: string;
   updated_at: string;
+  payment_method?: string | null;
 }
 
 export interface AdminUser {
@@ -93,4 +95,30 @@ export interface ActivityLog {
   action: string;
   details: Record<string, unknown>;
   created_at: string;
+}
+
+export interface OrderHistoryItem {
+  order_id: number;
+  order_status: OrderStatus;
+  total_amount: number;
+  payment_method: string | null;
+  created_at: string;
+  items?: { product_name: string; quantity: number; price_each: number }[];
+}
+
+export interface CustomerOrderHistory {
+  customer_id: number;
+  full_name?: string;
+  email?: string;
+  order_count: number;
+  total_spent: number;
+  points: number | null;
+  points_enabled: boolean;
+  orders: OrderHistoryItem[];
+}
+
+export interface PublicSettings {
+  points_enabled: boolean;
+  points_per_currency: number;
+  maintenance_mode: boolean;
 }

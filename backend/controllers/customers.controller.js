@@ -105,3 +105,18 @@ export const archive = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getSummary = async (req, res) => {
+  try {
+    const mod = await import('../models/settings.model.js');
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid customer id' });
+    }
+    const data = await mod.getCustomerSummaryAdmin(id);
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching customer summary:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

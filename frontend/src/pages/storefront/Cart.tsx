@@ -12,11 +12,12 @@ import { getEffectivePrice, hasActiveSale } from "@/lib/pricing";
 export function Cart() {
   const { lines, setQuantity, removeItem, subtotal, clear } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
-  const [form, setForm] = useState({ full_name: "", email: "", phone: "" });
+  const [form, setForm] = useState({ full_name: "", email: "", phone: "", payment_method: "Cash on Delivery" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
   const hasOutOfStockItems = lines.some((line) => line.product.stock === 0);
+  
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +29,7 @@ export function Cart() {
       const customer = await api.post<Customer>("/customers", form);
       const order = await api.post<{ order_id: number }>("/orders", {
         customer_id: customer.customer_id,
+        payment_method: form.payment_method,
       });
 
       for (const line of lines) {
@@ -188,6 +190,22 @@ export function Cart() {
             </div>
 
             {error && <p className="text-sm text-danger-500">{error}</p>}
+
+            {/* Payment method selection */}
+            <div>
+              <Label htmlFor="payment_method">Payment method</Label>
+              <select
+                id="payment_method"
+                value={form.payment_method}
+                onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
+                className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="GCash">GCash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Credit/Debit Card">Credit/Debit Card</option>
+              </select>
+            </div>
 
             <Button type="submit" size="lg" disabled={submitting}>
               {submitting ? "Placing order…" : `Place order — ₱${subtotal.toFixed(2)}`}

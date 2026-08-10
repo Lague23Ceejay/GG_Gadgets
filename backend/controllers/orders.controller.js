@@ -22,18 +22,17 @@ export const getOne = async (req, res) => {
 };
 
 export const create = async (req, res) => {
-  const { customer_id, extra } = req.body || {};
+  const { customer_id, extra, payment_method } = req.body || {};
 
   if (!customer_id) {
     return res.status(400).json({ error: 'customer_id is required' });
   }
 
-  const payload = {
+  const order = await OrderModel.createOrder({
     customer_id,
-    extra: extra ?? {}
-  };
-
-  const order = await OrderModel.createOrder(payload);
+    extra: extra ?? {},
+    payment_method: payment_method ?? null
+  });
 
   res.status(201).json({ order_id: order });
 };

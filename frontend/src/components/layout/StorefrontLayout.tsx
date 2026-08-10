@@ -1,9 +1,35 @@
+// src/components/layout/StorefrontLayout.tsx
 import { Link, Outlet } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useCart } from "@/context/CartContext";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 export function StorefrontLayout() {
   const { itemCount } = useCart();
+
+  // 🔽 New maintenance mode state
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  useEffect(() => {
+    api.get<{ maintenance_mode?: boolean }>("/settings/public").then((s) => {
+      setMaintenanceMode(s.maintenance_mode === true);
+    });
+  }, []);
+
+  // 🔽 Gate the storefront if maintenance mode is active
+  if (maintenanceMode) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 text-center">
+        <div>
+          <h1 className="font-display text-2xl font-700">We'll be right back</h1>
+          <p className="mt-2 text-zinc-500">
+            The store is temporarily down for maintenance.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas-light text-zinc-900 transition-theme dark:bg-canvas-dark dark:text-zinc-100">
@@ -16,6 +42,9 @@ export function StorefrontLayout() {
           <nav className="hidden items-center gap-6 text-sm font-medium sm:flex">
             <Link to="/shop" className="hover:text-accent-500 transition-theme">
               Shop
+            </Link>
+            <Link to="/order-history" className="hover:text-accent-500 transition-theme">
+              My Orders
             </Link>
             <Link to="/track-order" className="hover:text-accent-500 transition-theme">
               Track Order

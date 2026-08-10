@@ -19,6 +19,7 @@ import { TrackOrder } from "@/pages/storefront/TrackOrder";
 import { Shop } from "@/pages/storefront/Shop";
 import { AdminPromoEvents } from "@/pages/admin/PromoEvents";
 import { StaffLogs } from "@/pages/admin/StaffLogs";
+import { OrderHistory } from "@/pages/storefront/OrderHistory";
 
 export function App() {
   return (
@@ -30,6 +31,7 @@ export function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/track-order" element={<TrackOrder />} />
+        <Route path="/order-history" element={<OrderHistory />} />
       </Route>
 
       {/* Admin auth */}

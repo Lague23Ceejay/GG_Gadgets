@@ -1,3 +1,4 @@
+// src/pages/admin/Customers.tsx
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { Customer } from "@/types";
@@ -7,6 +8,12 @@ import { Input, Label } from "@/components/ui/Input";
 
 const emptyForm = { full_name: "", email: "", phone: "" };
 
+export interface CustomerOrderHistory {
+  orders_count: number;
+  total_spent: number;
+  points: number;
+}
+
 export function AdminCustomers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +22,10 @@ export function AdminCustomers() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // 🔽 New state for expandable summary
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [summary, setSummary] = useState<CustomerOrderHistory | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -70,6 +81,17 @@ export function AdminCustomers() {
     if (!confirm("Archive this customer?")) return;
     await api.del(`/customers/${id}`);
     load();
+  };
+
+  // 🔽 Toggle expand + fetch summary
+  const toggleExpand = async (id: number) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(id);
+    const data = await api.get<CustomerOrderHistory>(`/customers/${id}/summary`);
+    setSummary(data);
   };
 
   return (
@@ -153,28 +175,47 @@ export function AdminCustomers() {
               </tr>
             )}
             {customers.map((customer) => (
-              <tr
-                key={customer.customer_id}
-                className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
-              >
-                <td className="px-4 py-3 font-medium">{customer.full_name}</td>
-                <td className="px-4 py-3 text-zinc-500">{customer.email}</td>
-                <td className="px-4 py-3 text-zinc-500">{customer.phone || "—"}</td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => openEdit(customer)}
-                    className="mr-3 text-accent-500 hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleArchive(customer.customer_id)}
-                    className="text-danger-500 hover:underline"
-                  >
-                    Archive
-                  </button>
-                </td>
-              </tr>
+              <>
+                <tr
+                  key={customer.customer_id}
+                  className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
+                >
+                  <td className="px-4 py-3 font-medium">{customer.full_name}</td>
+                  <td className="px-4 py-3 text-zinc-500">{customer.email}</td>
+                  <td className="px-4 py-3 text-zinc-500">{customer.phone || "—"}</td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => openEdit(customer)}
+                      className="mr-3 text-accent-500 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleArchive(customer.customer_id)}
+                      className="mr-3 text-danger-500 hover:underline"
+                    >
+                      Archive
+                    </button>
+                    <button
+                      onClick={() => toggleExpand(customer.customer_id)}
+                      className="text-zinc-500 hover:underline"
+                    >
+                      {expandedId === customer.customer_id ? "Hide summary" : "View summary"}
+                    </button>
+                  </td>
+                </tr>
+                {expandedId === customer.customer_id && summary && (
+                  <tr className="bg-zinc-50 dark:bg-zinc-900/30">
+                    <td colSpan={4} className="px-4 py-3">
+                      <div className="flex gap-8 text-sm text-zinc-700 dark:text-zinc-300">
+                        <span>Orders: {summary.orders_count}</span>
+                        <span>Total spent: ₱{summary.total_spent.toFixed(2)}</span>
+                        <span>Points: {summary.points}</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
