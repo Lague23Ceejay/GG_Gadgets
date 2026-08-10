@@ -20,7 +20,7 @@ import { Shop } from "@/pages/storefront/Shop";
 import { AdminPromoEvents } from "@/pages/admin/PromoEvents";
 import { StaffLogs } from "@/pages/admin/StaffLogs";
 import { OrderHistory } from "@/pages/storefront/OrderHistory";
-
+import { AdminSettings } from "@/pages/admin/Settings";
 export function App() {
   return (
     <Routes>
@@ -32,6 +32,7 @@ export function App() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/order-history" element={<OrderHistory />} />
+        
       </Route>
 
       {/* Admin auth */}
@@ -104,6 +105,14 @@ export function App() {
           element={
             <RoleRoute allowedRoles={["super_admin"]}>
               <AdminUsers />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <RoleRoute allowedRoles={["super_admin"]}>
+              <AdminSettings />
             </RoleRoute>
           }
         />

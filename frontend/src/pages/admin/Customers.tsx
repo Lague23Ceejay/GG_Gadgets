@@ -1,18 +1,18 @@
-// src/pages/admin/Customers.tsx
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import type { Customer } from "@/types";
+import type { Customer, CustomerOrderHistory, OrderStatus } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
+import { Badge } from "@/components/ui/Badge";
+
+const STATUS_TONE: Record<OrderStatus, "spark" | "success" | "danger"> = {
+  pending: "spark",
+  completed: "success",
+  cancelled: "danger",
+};
 
 const emptyForm = { full_name: "", email: "", phone: "" };
-
-export interface CustomerOrderHistory {
-  orders_count: number;
-  total_spent: number;
-  points: number;
-}
 
 export function AdminCustomers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -22,10 +22,9 @@ export function AdminCustomers() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // 🔽 New state for expandable summary
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [summary, setSummary] = useState<CustomerOrderHistory | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -83,15 +82,21 @@ export function AdminCustomers() {
     load();
   };
 
-  // 🔽 Toggle expand + fetch summary
-  const toggleExpand = async (id: number) => {
+  const toggleHistory = async (id: number) => {
     if (expandedId === id) {
       setExpandedId(null);
+      setSummary(null);
       return;
     }
     setExpandedId(id);
-    const data = await api.get<CustomerOrderHistory>(`/customers/${id}/summary`);
-    setSummary(data);
+    setSummary(null);
+    setSummaryLoading(true);
+    try {
+      const data = await api.get<CustomerOrderHistory>(`/customers/${id}/summary`);
+      setSummary(data);
+    } finally {
+      setSummaryLoading(false);
+    }
   };
 
   return (
@@ -150,39 +155,45 @@ export function AdminCustomers() {
       )}
 
       <Card className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-zinc-200 text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Phone</th>
+              <th className="px-4 py-3">History</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
                   Loading…
                 </td>
               </tr>
             )}
             {!loading && customers.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
                   No customers yet.
                 </td>
               </tr>
             )}
             {customers.map((customer) => (
-              <>
-                <tr
-                  key={customer.customer_id}
-                  className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60"
-                >
+              <Fragment key={customer.customer_id}>
+                <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60">
                   <td className="px-4 py-3 font-medium">{customer.full_name}</td>
                   <td className="px-4 py-3 text-zinc-500">{customer.email}</td>
                   <td className="px-4 py-3 text-zinc-500">{customer.phone || "—"}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => toggleHistory(customer.customer_id)}
+                      className="text-accent-500 hover:underline"
+                    >
+                      {expandedId === customer.customer_id ? "Hide" : "View"}
+                    </button>
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => openEdit(customer)}
@@ -192,30 +203,81 @@ export function AdminCustomers() {
                     </button>
                     <button
                       onClick={() => handleArchive(customer.customer_id)}
-                      className="mr-3 text-danger-500 hover:underline"
+                      className="text-danger-500 hover:underline"
                     >
                       Archive
                     </button>
-                    <button
-                      onClick={() => toggleExpand(customer.customer_id)}
-                      className="text-zinc-500 hover:underline"
-                    >
-                      {expandedId === customer.customer_id ? "Hide summary" : "View summary"}
-                    </button>
                   </td>
                 </tr>
-                {expandedId === customer.customer_id && summary && (
-                  <tr className="bg-zinc-50 dark:bg-zinc-900/30">
-                    <td colSpan={4} className="px-4 py-3">
-                      <div className="flex gap-8 text-sm text-zinc-700 dark:text-zinc-300">
-                        <span>Orders: {summary.orders_count}</span>
-                        <span>Total spent: ₱{summary.total_spent.toFixed(2)}</span>
-                        <span>Points: {summary.points}</span>
-                      </div>
+
+                {expandedId === customer.customer_id && (
+                  <tr className="bg-zinc-50 dark:bg-zinc-900/50">
+                    <td colSpan={5} className="px-4 py-4">
+                      {summaryLoading && <p className="text-sm text-zinc-500">Loading…</p>}
+
+                      {!summaryLoading && summary && (
+                        <div>
+                          <div className="mb-4 grid grid-cols-3 gap-3">
+                            <div className="rounded-lg bg-white p-3 text-center dark:bg-zinc-800">
+                              <p className="text-xs uppercase tracking-wide text-zinc-500">Orders</p>
+                              <p className="mt-1 font-mono text-lg font-semibold">
+                                {summary.order_count}
+                              </p>
+                            </div>
+                            <div className="rounded-lg bg-white p-3 text-center dark:bg-zinc-800">
+                              <p className="text-xs uppercase tracking-wide text-zinc-500">
+                                Total spent
+                              </p>
+                              <p className="mt-1 font-mono text-lg font-semibold">
+                                ₱{Number(summary.total_spent).toFixed(2)}
+                              </p>
+                            </div>
+                            {summary.points !== null && (
+                              <div className="rounded-lg bg-white p-3 text-center dark:bg-zinc-800">
+                                <p className="text-xs uppercase tracking-wide text-zinc-500">Points</p>
+                                <p className="mt-1 font-mono text-lg font-semibold text-accent-500">
+                                  {summary.points}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                            Orders
+                          </p>
+                          {summary.orders.length === 0 ? (
+                            <p className="text-sm text-zinc-500">No orders yet.</p>
+                          ) : (
+                            <ul className="flex flex-col gap-1.5 text-sm">
+                              {summary.orders.map((order) => (
+                                <li
+                                  key={order.order_id}
+                                  className="flex items-center justify-between rounded-lg bg-white px-3 py-2 dark:bg-zinc-800"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono">#{order.order_id}</span>
+                                    <Badge tone={STATUS_TONE[order.order_status]}>
+                                      {order.order_status}
+                                    </Badge>
+                                    {order.payment_method && (
+                                      <span className="text-xs text-zinc-500">
+                                        {order.payment_method}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="font-mono">
+                                    ₱{Number(order.total_amount).toFixed(2)}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
