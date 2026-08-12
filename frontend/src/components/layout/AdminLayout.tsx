@@ -9,6 +9,7 @@ const NAV_ITEMS: { to: string; label: string; end?: boolean; roles: Role[] }[] =
   { to: "/admin/products", label: "Products", roles: ["super_admin", "store_manager"] },
   { to: "/admin/categories", label: "Categories", roles: ["super_admin", "store_manager"] },
   { to: "/admin/customers", label: "Customers", roles: ["super_admin", "store_manager"] },
+  { to: "/admin/rewards", label: "Rewards", roles: ["super_admin", "store_manager"] },
   { to: "/admin/orders", label: "Orders", roles: ["super_admin", "store_manager", "fulfillment"] },
   { to: "/admin/inventory", label: "Inventory", roles: ["super_admin", "store_manager", "fulfillment"] },
   { to: "/admin/users", label: "Staff accounts", roles: ["super_admin"] },

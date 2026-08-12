@@ -286,7 +286,7 @@ export function AdminOrders() {
                                   onChange={(e) =>
                                     setItemForm({ ...itemForm, product_id: e.target.value })
                                   }
-                                  className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                                  className="h-10 w-full rounded-lg border border-zinc-300 bg-purple-400 px-3 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                                 >
                                   <option value="">Select a product…</option>
                                   {products.map((p) => (

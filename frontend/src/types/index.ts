@@ -122,3 +122,12 @@ export interface PublicSettings {
   points_per_currency: number;
   maintenance_mode: boolean;
 }
+
+export interface PhysicalReward {
+  reward_id: number;
+  item_name: string;
+  point_cost: number;
+  stock_count: number;
+  image_url: string | null;
+  is_active?: boolean;
+}

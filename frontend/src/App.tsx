@@ -21,6 +21,8 @@ import { AdminPromoEvents } from "@/pages/admin/PromoEvents";
 import { StaffLogs } from "@/pages/admin/StaffLogs";
 import { OrderHistory } from "@/pages/storefront/OrderHistory";
 import { AdminSettings } from "@/pages/admin/Settings";
+import { AdminRewards } from "@/pages/admin/Rewards";
+
 export function App() {
   return (
     <Routes>
@@ -95,6 +97,14 @@ export function App() {
           element={
             <RoleRoute allowedRoles={["super_admin", "store_manager"]}>
               <AdminCustomers />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="rewards"
+          element={
+            <RoleRoute allowedRoles={["super_admin", "store_manager"]}>
+              <AdminRewards />
             </RoleRoute>
           }
         />

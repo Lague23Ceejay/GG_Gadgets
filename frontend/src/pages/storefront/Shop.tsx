@@ -41,7 +41,7 @@ export function Shop() {
 
   return (
     <div>
-      <section className="border-b border-zinc-200 transition-theme dark:border-zinc-800">
+      <section className="border-b border-zinc-200 transition-theme   dark:border-zinc-800">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <h1 className="font-display text-3xl font-700 tracking-tight">Shop</h1>
           <p className="mt-1 text-zinc-500">Everything we've got, in one place.</p>

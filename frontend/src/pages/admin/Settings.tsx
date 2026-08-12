@@ -102,14 +102,13 @@ function ToggleSwitch({
       aria-checked={checked}
       disabled={disabled}
       onClick={onClick}
-      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-        checked ? "bg-accent-500" : "bg-zinc-300 dark:bg-zinc-700"
-      }`}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 ease-in-out
+        ${checked ? "bg-accent-500" : "bg-zinc-300 dark:bg-zinc-700"}
+        disabled:opacity-50`}
     >
       <span
-        className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          checked ? "translate-x-6" : "translate-x-1"
-        }`}
+        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out
+          ${checked ? "translate-x-5" : "translate-x-0"}`}
       />
     </button>
   );
