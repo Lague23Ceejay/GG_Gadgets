@@ -1,3 +1,8 @@
+{/**
+ * AuthContext.tsx
+ * This file contains the authentication context for the application.
+ * It provides a way to manage user authentication state and actions such as login and logout.
+ */}
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { api } from "@/lib/api";
 

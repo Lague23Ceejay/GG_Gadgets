@@ -5,29 +5,30 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_LOW_TIER = 3;
+const MAX_HIGH_TIER = 2;
 
 interface RewardsDrawerProps {
   email: string;
-  onVerifiedRewardChange: (rewardId: number | null) => void;
+  onVerifiedRewardsChange: (rewardIds: number[]) => void;
 }
 
-export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerProps) {
+export function RewardsDrawer({ email, onVerifiedRewardsChange }: RewardsDrawerProps) {
   const [balance, setBalance] = useState<number | null>(null);
   const [rewards, setRewards] = useState<PhysicalReward[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset everything if the email changes after a reward was already picked/verified
   useEffect(() => {
-    setSelectedId(null);
+    setSelectedIds([]);
     setOtpSent(false);
     setOtpCode("");
     setVerified(false);
-    onVerifiedRewardChange(null);
+    onVerifiedRewardsChange([]);
     setError(null);
 
     if (!EMAIL_RE.test(email)) {
@@ -56,14 +57,32 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [email]);
 
-  const handleSelect = (reward: PhysicalReward) => {
-    if (balance === null || balance < reward.point_cost) return;
-    setSelectedId(reward.reward_id);
+  const selectedRewards = rewards.filter((r) => selectedIds.includes(r.reward_id));
+  const pointsSpent = selectedRewards.reduce((sum, r) => sum + r.point_cost, 0);
+  const lowTierCount = selectedRewards.filter((r) => !r.is_high_end).length;
+  const highTierCount = selectedRewards.filter((r) => r.is_high_end).length;
+  const remaining = (balance ?? 0) - pointsSpent;
+
+  const canSelect = (reward: PhysicalReward) => {
+    if (selectedIds.includes(reward.reward_id)) return true; // always allow deselecting
+    if (reward.point_cost > remaining) return false;
+    if (reward.is_high_end && highTierCount >= MAX_HIGH_TIER) return false;
+    if (!reward.is_high_end && lowTierCount >= MAX_LOW_TIER) return false;
+    return true;
+  };
+
+  const toggleReward = (reward: PhysicalReward) => {
+    if (!canSelect(reward)) return;
     setOtpSent(false);
     setOtpCode("");
     setVerified(false);
-    onVerifiedRewardChange(null);
+    onVerifiedRewardsChange([]);
     setError(null);
+    setSelectedIds((prev) =>
+      prev.includes(reward.reward_id)
+        ? prev.filter((id) => id !== reward.reward_id)
+        : [...prev, reward.reward_id]
+    );
   };
 
   const handleSendCode = async () => {
@@ -86,7 +105,7 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
       const result = await loyaltyApi.verifyOtp(email, otpCode);
       if (result.verified) {
         setVerified(true);
-        onVerifiedRewardChange(selectedId);
+        onVerifiedRewardsChange(selectedIds);
       } else {
         setError("That code didn't work.");
       }
@@ -97,7 +116,6 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
     }
   };
 
-  // Hidden state — no valid email with points yet
   if (balance === null || balance <= 0) return null;
 
   return (
@@ -105,22 +123,25 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
       <p className="text-sm font-semibold text-accent-700 dark:text-accent-300">
         🎁 You have {balance} points available!
       </p>
+      <p className="mt-0.5 text-xs text-accent-600 dark:text-accent-400">
+        Pick up to {MAX_LOW_TIER} standard items and {MAX_HIGH_TIER} high-end items.
+      </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {rewards.map((reward) => {
-          const affordable = balance >= reward.point_cost;
-          const isSelected = selectedId === reward.reward_id;
+          const isSelected = selectedIds.includes(reward.reward_id);
+          const selectable = canSelect(reward);
           return (
             <button
               key={reward.reward_id}
               type="button"
-              disabled={!affordable}
-              onClick={() => handleSelect(reward)}
+              disabled={!selectable}
+              onClick={() => toggleReward(reward)}
               className={`rounded-lg border p-2 text-left transition-theme ${
-                !affordable
+                !selectable
                   ? "cursor-not-allowed border-zinc-200 opacity-40 dark:border-zinc-800"
                   : isSelected
-                    ? "border-accent-500 bg-white dark:bg-zinc-900"
+                    ? "border-accent-500 bg-white ring-1 ring-accent-500 dark:bg-zinc-900"
                     : "border-zinc-200 bg-white hover:border-accent-300 dark:border-zinc-800 dark:bg-zinc-900"
               }`}
             >
@@ -129,15 +150,29 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
                   <img src={reward.image_url} alt="" className="h-full w-full object-cover" />
                 </div>
               )}
-              <p className="text-xs font-medium">{reward.item_name}</p>
-              <p className="font-mono text-xs text-zinc-500">{reward.point_cost} pts</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium">{reward.item_name}</p>
+                {isSelected && <span className="text-accent-500">✓</span>}
+              </div>
+              <p className="font-mono text-xs text-zinc-500">
+                {reward.point_cost} pts {reward.is_high_end && "· High-end"}
+              </p>
             </button>
           );
         })}
       </div>
 
-      {selectedId && !verified && (
-        <div className="mt-3 flex flex-col gap-2 border-t border-accent-200 pt-3 dark:border-accent-500/30">
+      {selectedIds.length > 0 && (
+        <div className="mt-3 flex items-center justify-between border-t border-accent-200 pt-3 text-xs dark:border-accent-500/30">
+          <span>
+            {selectedIds.length} selected · {pointsSpent} pts
+          </span>
+          <span className="text-zinc-500">{remaining} pts remaining</span>
+        </div>
+      )}
+
+      {selectedIds.length > 0 && !verified && (
+        <div className="mt-3 flex flex-col gap-2">
           {!otpSent ? (
             <Button type="button" size="sm" onClick={handleSendCode} disabled={loading}>
               {loading ? "Sending…" : "Send verification code"}
@@ -161,7 +196,7 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
                 onClick={handleVerify}
                 disabled={loading || otpCode.length !== 4}
               >
-                {loading ? "Checking…" : "Apply Reward"}
+                {loading ? "Checking…" : "Apply Rewards"}
               </Button>
             </div>
           )}
@@ -171,7 +206,7 @@ export function RewardsDrawer({ email, onVerifiedRewardChange }: RewardsDrawerPr
 
       {verified && (
         <p className="mt-3 border-t border-accent-200 pt-3 text-sm font-medium text-success-600 dark:border-accent-500/30">
-          ✓ Reward verified — it'll be added when you place your order.
+          ✓ {selectedIds.length} reward{selectedIds.length > 1 ? "s" : ""} verified — added when you place your order.
         </p>
       )}
     </div>

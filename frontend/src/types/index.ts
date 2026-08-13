@@ -130,4 +130,62 @@ export interface PhysicalReward {
   stock_count: number;
   image_url: string | null;
   is_active?: boolean;
+  is_high_end: boolean;
+}
+
+export type HomepageSectionKey = "events" | "on_sale" | "best_sellers";
+
+export interface PublicSettings {
+  points_enabled: boolean;
+  points_per_currency: number;
+  maintenance_mode: boolean;
+  homepage_layout?: HomepageSectionKey[];
+}
+
+export interface SalesKpis {
+  gross_revenue: number;
+  avg_order_value: number;
+  rewards_fulfillment_cost: number;
+}
+
+export interface CategoryBreakdownItem {
+  category_id: number;
+  name: string;
+  revenue: number;
+  share_percent: number;
+}
+
+export interface CategoryDetail {
+  category_id: number;
+  name: string;
+  revenue: number;
+  share_percent: number;
+  mom_growth_percent: number;
+  max_day_revenue: number;
+  min_day_revenue: number;
+}
+
+export interface ProductSalesRow {
+  product_id: number;
+  name: string;
+  category_names: string;
+  units_sold: number;
+  avg_price: number;
+  revenue: number;
+}
+
+export interface RewardAnalyticsRow {
+  reward_id: number;
+  item_name: string;
+  claims_count: number;
+  points_burned: number;
+  wholesale_cost_total: number;
+  popularity_share_percent: number;
+}
+
+export interface AnalyticsOverview {
+  kpis: SalesKpis;
+  category_breakdown: CategoryBreakdownItem[];
+  product_table: ProductSalesRow[];
+  rewards_table: RewardAnalyticsRow[];
 }

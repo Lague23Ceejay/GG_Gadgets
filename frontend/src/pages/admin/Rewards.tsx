@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 
-const emptyForm = { item_name: "", point_cost: "", stock_count: "", is_active: true };
+const emptyForm = { item_name: "", point_cost: "", stock_count: "", is_high_end: false, is_active: true };
 
 export function AdminRewards() {
   const [rewards, setRewards] = useState<PhysicalReward[]>([]);
@@ -45,6 +45,7 @@ export function AdminRewards() {
       item_name: reward.item_name,
       point_cost: String(reward.point_cost),
       stock_count: String(reward.stock_count),
+      is_high_end: reward.is_high_end,
       is_active: reward.is_active ?? true,
     });
     setImageUrl(reward.image_url);
@@ -83,6 +84,7 @@ export function AdminRewards() {
       point_cost: Number(form.point_cost),
       stock_count: Number(form.stock_count),
       image_url: imageUrl,
+      is_high_end: form.is_high_end,
       is_active: form.is_active,
     };
 
@@ -176,6 +178,19 @@ export function AdminRewards() {
               >
                 {uploading ? "Uploading…" : imageUrl ? "Replace image" : "+ Upload image"}
               </Button>
+            </div>
+
+            <div className="flex items-center gap-2 sm:col-span-2">
+              <input
+                id="is_high_end"
+                type="checkbox"
+                checked={form.is_high_end}
+                onChange={(e) => setForm({ ...form, is_high_end: e.target.checked })}
+                className="h-4 w-4 rounded border-zinc-300 text-accent-500 dark:border-zinc-700"
+              />
+              <Label htmlFor="is_high_end" className="mb-0">
+                High-end item (limited to 1–2 per order, vs. 1–3 for standard items)
+              </Label>
             </div>
 
             <div className="flex items-center gap-2 sm:col-span-2">

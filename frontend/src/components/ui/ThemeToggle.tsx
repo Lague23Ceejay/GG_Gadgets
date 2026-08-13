@@ -25,13 +25,13 @@ export function ThemeToggle() {
         aria-hidden
         className="absolute left-1.5 text-[9px] font-mono text-zinc-400 dark:text-accent-300 select-none"
       >
-        ON
+        OFF
       </span>
       <span
         aria-hidden
         className="absolute right-1.5 text-[9px] font-mono text-zinc-400 dark:text-zinc-600 select-none"
       >
-        OFF
+        ON
       </span>
 
       {/* Rocker knob */}

@@ -4,6 +4,8 @@ import { api } from "@/lib/api";
 import type { Product, Category } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
+import { useSearchParams } from "react-router-dom";
+import { hasActiveSale } from "@/lib/pricing";
 
 export function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,6 +14,10 @@ export function Shop() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<"all" | "sale">(
+  searchParams.get("tab") === "sale" ? "sale" : "all"
+);
 
   useEffect(() => {
     Promise.all([productsApi.list(), api.get<Category[]>("/categories")])
@@ -24,9 +30,9 @@ export function Shop() {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const query = search.trim().toLowerCase();
 
-    return products.filter((product) => {
+  return products.filter((product) => {
       const matchesSearch =
         !query ||
         product.name.toLowerCase().includes(query) ||
@@ -35,56 +41,76 @@ export function Shop() {
       const matchesCategory =
         !activeCategory || (product.categories ?? []).some((c) => c.name === activeCategory);
 
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, search, activeCategory]);
+      const matchesTab = activeTab === "all" || hasActiveSale(product);
+
+          return matchesSearch && matchesCategory && matchesTab;
+        });
+      }, [products, search, activeCategory, activeTab]);
 
   return (
     <div>
-      <section className="border-b border-zinc-200 transition-theme   dark:border-zinc-800">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <h1 className="font-display text-3xl font-700 tracking-tight">Shop</h1>
-          <p className="mt-1 text-zinc-500">Everything we've got, in one place.</p>
-        </div>
-      </section>
+      {/* Filters: tabs (left) + category pills (right) on one row, search below */}
+<section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex gap-2">
+      <button
+        onClick={() => setActiveTab("all")}
+        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-theme ${
+          activeTab === "all"
+            ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+            : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
+        }`}
+      >
+        All Products
+      </button>
+      <button
+        onClick={() => setActiveTab("sale")}
+        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-theme ${
+          activeTab === "sale"
+            ? "bg-danger-500 text-white"
+            : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
+        }`}
+      >
+        🔥 On Sale
+      </button>
+    </div>
 
-      {/* Search + category filter */}
-      <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search products…"
-          className="max-w-sm"
-        />
+    {categories.length > 0 && (
+      <div className="flex flex-wrap gap-2 sm:justify-end">
+        <button
+          onClick={() => setActiveCategory(null)}
+          className={`rounded-full px-3 py-1 text-xs font-medium transition-theme ${
+            activeCategory === null
+              ? "bg-accent-500 text-white"
+              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+          }`}
+        >
+          All
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat.category_id}
+            onClick={() => setActiveCategory(cat.name)}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-theme ${
+              activeCategory === cat.name
+                ? "bg-accent-500 text-white"
+                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
 
-        {categories.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveCategory(null)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-theme ${
-                activeCategory === null
-                  ? "bg-accent-500 text-white"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
-              }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.category_id}
-                onClick={() => setActiveCategory(cat.name)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-theme ${
-                  activeCategory === cat.name
-                    ? "bg-accent-500 text-white"
-                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
+  <Input
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    placeholder="Search products…"
+    className="mt-4 max-w-sm"
+  />
+</section>
 
       {/* Product grid */}
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">

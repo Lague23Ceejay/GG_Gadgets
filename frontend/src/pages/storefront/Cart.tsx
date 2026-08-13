@@ -11,6 +11,7 @@ import { getEffectivePrice, hasActiveSale } from "@/lib/pricing";
 import { RewardsDrawer } from "@/components/storefront/RewardsDrawer";
 import { loyaltyApi } from "@/lib/loyalty";
 
+
 export function Cart() {
   const { lines, setQuantity, removeItem, subtotal, clear } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
@@ -19,8 +20,9 @@ export function Cart() {
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
   const hasOutOfStockItems = lines.some((line) => line.product.stock === 0);
-  const [verifiedRewardId, setVerifiedRewardId] = useState<number | null>(null);
-  const [rewardMessage, setRewardMessage] = useState<string | null>(null);
+  const [verifiedRewardIds, setVerifiedRewardIds] = useState<number[]>([]);
+  const [rewardMessages, setRewardMessages] = useState<string[]>([]);
+  
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,17 +46,19 @@ export function Cart() {
         });
       }
 
-      if (verifiedRewardId) {
-        try {
-          const result = await loyaltyApi.redeem(form.email, verifiedRewardId, order.order_id);
-          setRewardMessage(`🎉 ${result.reward_name} redeemed!`);
-        } catch (err) {
-          // Order still succeeds even if redemption fails at the last second
-          // (e.g. someone else claimed the last unit in the meantime)
-          setRewardMessage(
-            err instanceof Error ? `Reward couldn't be redeemed: ${err.message}` : "Reward redemption failed."
-          );
+      {form.email && <RewardsDrawer email={form.email} onVerifiedRewardsChange={setVerifiedRewardIds} />}
+
+      if (verifiedRewardIds.length > 0) {
+        const messages: string[] = [];
+        for (const rewardId of verifiedRewardIds) {
+          try {
+            const result = await loyaltyApi.redeem(form.email, rewardId, order.order_id);
+            messages.push(`🎉 ${result.reward_name} redeemed!`);
+          } catch (err) {
+            messages.push(err instanceof Error ? `A reward couldn't be redeemed: ${err.message}` : "A reward redemption failed.");
+          }
         }
+        setRewardMessages(messages);
       }
 
       setOrderId(order.order_id);
@@ -78,9 +82,9 @@ export function Cart() {
         </p>
 
         {/* Reward message (if any) */}
-        {rewardMessage && (
-          <p className="mt-3 text-sm text-accent-600 dark:text-accent-400">{rewardMessage}</p>
-        )}
+        {rewardMessages.map((msg, i) => (
+          <p key={i} className="mt-1 text-sm text-accent-600 dark:text-accent-400">{msg}</p>
+        ))}
 
         <div className="mt-4 rounded-lg bg-accent-50 px-4 py-3 text-sm text-accent-700 dark:bg-accent-500/10 dark:text-accent-300">
           Save your order number — you'll need it to check your order status later.
@@ -202,7 +206,6 @@ export function Cart() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </div>
-                        {form.email && <RewardsDrawer email={form.email} onVerifiedRewardChange={setVerifiedRewardId} />}
 
             <div>
               <Label htmlFor="phone">Phone (optional)</Label>

@@ -5,6 +5,7 @@ import promoEventsRoutes from "./routes/promoEvents.routes.js";
 import activityLogRoutes from "./routes/activityLog.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 import loyaltyRoutes from "./routes/loyalty.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use("/api/v1/settings", settingsRoutes);
 console.log("✅ Mounted routes: /api/v1/settings");
 app.use("/api/v1/loyalty", loyaltyRoutes);
 console.log("✅ Mounted routes: /api/v1/loyalty");
+app.use("/api/v1/analytics", analyticsRoutes);
+console.log("✅ Mounted routes: /api/v1/analytics");
 
 // Health check
 app.get("/", (req, res) => res.json({ status: "ok" }));

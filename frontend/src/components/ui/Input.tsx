@@ -1,5 +1,10 @@
+// Input.tsx
 import type { InputHTMLAttributes, LabelHTMLAttributes } from "react";
-
+{/**
+ * A reusable input component with a label. The label is optional and can be
+ * styled via the className prop. The input itself can also be styled via the
+ * className prop.
+ */}
 export function Input({ className = "", ...rest }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input

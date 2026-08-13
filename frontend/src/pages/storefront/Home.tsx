@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { productsApi } from "@/lib/products";
-import type { Product } from "@/types";
+import { api } from "@/lib/api";
+import type { Product, HomepageSectionKey, PublicSettings } from "@/types";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
 import { EventsCarousel } from "@/components/storefront/EventsCarousel";
 
@@ -9,19 +10,36 @@ export function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [layout, setLayout] = useState<HomepageSectionKey[]>([
+    "events",
+    "on_sale",
+    "best_sellers",
+  ]);
 
   useEffect(() => {
     productsApi
       .list()
       .then(setProducts)
-      .catch(() => setError("Couldn't load products. Check that the backend is running."))
+      .catch(() =>
+        setError("Couldn't load products. Check that the backend is running.")
+      )
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    api.get<PublicSettings>("/settings/public").then((s) => {
+      if (s.homepage_layout) setLayout(s.homepage_layout);
+    });
   }, []);
 
   const featured = products.filter((p) => p.attributes?.featured === true);
   const onSale = products.filter((p) => {
     const salePrice = p.attributes?.sale_price as number | undefined;
-    return typeof salePrice === "number" && salePrice > 0 && salePrice < Number(p.price);
+    return (
+      typeof salePrice === "number" &&
+      salePrice > 0 &&
+      salePrice < Number(p.price)
+    );
   });
 
   return (
@@ -36,7 +54,8 @@ export function Home() {
             Gear that actually keeps up with you.
           </h1>
           <p className="mt-4 max-w-xl text-zinc-600 dark:text-zinc-400">
-            Curated gadgets, checked stock, straight to your door. No filler, just the good stuff.
+            Curated gadgets, checked stock, straight to your door. No filler,
+            just the good stuff.
           </p>
           <Link
             to="/shop"
@@ -55,21 +74,36 @@ export function Home() {
 
       {error && (
         <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <p className="rounded-lg bg-danger-500/10 px-4 py-3 text-sm text-danger-600">{error}</p>
+          <p className="rounded-lg bg-danger-500/10 px-4 py-3 text-sm text-danger-600">
+            {error}
+          </p>
         </section>
       )}
 
-      {!loading && !error && onSale.length > 0 && (
-        <ShowcaseSection title="On sale" subtitle="Limited-time price drops." products={onSale} />
-      )}
-
-      {!loading && !error && featured.length > 0 && (
-        <ShowcaseSection
-          title="Best sellers"
-          subtitle="What everyone's actually buying."
-          products={featured}
-        />
-      )}
+      {!loading &&
+        !error &&
+        layout.map((key) => {
+          if (key === "events") return <EventsCarousel key="events" />;
+          if (key === "on_sale" && onSale.length > 0)
+            return (
+              <ShowcaseSection
+                key="on_sale"
+                title="On sale"
+                subtitle="Limited-time price drops."
+                products={onSale}
+              />
+            );
+          if (key === "best_sellers" && featured.length > 0)
+            return (
+              <ShowcaseSection
+                key="best_sellers"
+                title="Best sellers"
+                subtitle="What everyone's actually buying."
+                products={featured}
+              />
+            );
+          return null;
+        })}
 
       {!loading && !error && featured.length === 0 && onSale.length === 0 && (
         <section className="mx-auto max-w-6xl px-4 py-10 text-center sm:px-6">
@@ -81,7 +115,6 @@ export function Home() {
           </p>
         </section>
       )}
-      <EventsCarousel />
 
       {!loading && !error && (featured.length > 0 || onSale.length > 0) && (
         <section className="mx-auto max-w-6xl px-4 pb-16 text-center sm:px-6">

@@ -14,13 +14,18 @@ export function ProductDetail() {
   const [notFound, setNotFound] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { addItem } = useCart();
 
   useEffect(() => {
     if (!id) return;
     productsApi
       .getById(Number(id))
-      .then(setProduct)
+      .then((p) => {
+        setProduct(p);
+        const primaryIdx = p.images?.findIndex((img) => img.is_primary) ?? -1;
+        setActiveImageIndex(primaryIdx >= 0 ? primaryIdx : 0);
+      })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [id]);
@@ -41,7 +46,8 @@ export function ProductDetail() {
     );
   }
 
-  const primaryImage = product.images?.find((img) => img.is_primary) ?? product.images?.[0];
+  const images = product.images ?? [];
+  const activeImage = images[activeImageIndex];
   const isOutOfStock = product.stock === 0;
 
   const handleAddToCart = () => {
@@ -53,11 +59,40 @@ export function ProductDetail() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="grid gap-8 sm:grid-cols-2 sm:gap-12">
-        <div className="aspect-square overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
-          {primaryImage ? (
-            <img src={primaryImage.image_url} alt={product.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center text-zinc-400">No image</div>
+        <div>
+          <div className="aspect-square overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+            {activeImage ? (
+              <img
+                src={activeImage.image_url}
+                alt={activeImage.caption ?? product.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-zinc-400">No image</div>
+            )}
+          </div>
+
+          {activeImage?.caption && (
+            <p className="mt-2 text-center text-sm text-zinc-500">{activeImage.caption}</p>
+          )}
+
+          {images.length > 1 && (
+            <div className="mt-3 grid grid-cols-5 gap-2">
+              {images.map((img, index) => (
+                <button
+                  key={img.image_id}
+                  onClick={() => setActiveImageIndex(index)}
+                  className={`aspect-square overflow-hidden rounded-lg border-2 bg-zinc-100 transition-theme dark:bg-zinc-800 ${
+                    index === activeImageIndex
+                      ? "border-accent-500"
+                      : "border-transparent hover:border-zinc-300 dark:hover:border-zinc-600"
+                  }`}
+                  aria-label={`Show image ${index + 1}`}
+                >
+                  <img src={img.image_url} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
@@ -65,7 +100,7 @@ export function ProductDetail() {
           {product.categories && product.categories.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-1.5">
               {product.categories.map((cat) => (
-                 <Badge key={cat.category_id} tone="accent">
+                <Badge key={cat.category_id} tone="accent">
                   {cat.name}
                 </Badge>
               ))}
@@ -73,6 +108,7 @@ export function ProductDetail() {
           )}
 
           <h1 className="font-display text-2xl font-700 tracking-tight sm:text-3xl">{product.name}</h1>
+
           {hasActiveSale(product) ? (
             <div className="mt-3 flex items-baseline gap-2">
               <p className="font-mono text-2xl font-semibold text-danger-500">
@@ -93,16 +129,6 @@ export function ProductDetail() {
             <p className="mt-4 text-zinc-600 dark:text-zinc-400">{product.description}</p>
           )}
 
-          <div className="mt-4">
-            {isOutOfStock ? (
-              <Badge tone="danger">Out of stock</Badge>
-            ) : product.stock <= 5 ? (
-              <Badge tone="spark">Only {product.stock} left in stock</Badge>
-            ) : (
-              <Badge tone="success">In stock</Badge>
-            )}
-          </div>
-
           {Array.isArray(product.attributes?.specifications) &&
             (product.attributes.specifications as string[]).length > 0 && (
               <div className="mt-6">
@@ -119,6 +145,16 @@ export function ProductDetail() {
                 </ul>
               </div>
             )}
+
+          <div className="mt-4">
+            {isOutOfStock ? (
+              <Badge tone="danger">Out of stock</Badge>
+            ) : product.stock <= 5 ? (
+              <Badge tone="spark">Only {product.stock} left in stock</Badge>
+            ) : (
+              <Badge tone="success">In stock</Badge>
+            )}
+          </div>
 
           <div className="mt-6 flex items-center gap-3">
             <div className="flex items-center rounded-lg border border-zinc-300 dark:border-zinc-700">

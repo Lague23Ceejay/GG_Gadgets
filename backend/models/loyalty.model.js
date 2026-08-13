@@ -18,15 +18,15 @@ export const getAllRewards = async () => {
   return rows[0]?.result ?? [];
 };
 
-export const createReward = async ({ item_name, point_cost, stock_count, image_url }) => {
-  const query = `CALL gs_schema.sp_create_reward($1, $2, $3, $4, NULL);`;
-  const { rows } = await db.query(query, [item_name, point_cost, stock_count, image_url ?? null]);
+export const createReward = async ({ item_name, point_cost, stock_count, image_url, is_high_end }) => {
+  const query = `CALL gs_schema.sp_create_reward($1, $2, $3, $4, $5, NULL);`;
+  const { rows } = await db.query(query, [item_name, point_cost, stock_count, image_url ?? null, is_high_end ?? false]);
   return rows[0]?.new_id ?? null;
 };
 
-export const updateReward = async (id, { item_name, point_cost, stock_count, image_url, is_active }) => {
-  const query = `CALL gs_schema.sp_update_reward($1, $2, $3, $4, $5, $6, NULL);`;
-  const { rows } = await db.query(query, [id, item_name, point_cost, stock_count, image_url ?? null, is_active]);
+export const updateReward = async (id, { item_name, point_cost, stock_count, image_url, is_active, is_high_end }) => {
+  const query = `CALL gs_schema.sp_update_reward($1, $2, $3, $4, $5, $6, $7, NULL);`;
+  const { rows } = await db.query(query, [id, item_name, point_cost, stock_count, image_url ?? null, is_active, is_high_end ?? false]);
   return rows[0]?.success ?? false;
 };
 

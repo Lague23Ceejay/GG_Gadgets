@@ -1,5 +1,11 @@
+// Button.tsx
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+{/**
+ * A reusable button component with support for different variants and sizes.
+ * Variants: primary, secondary, ghost, danger
+ * Sizes: sm, md, lg
+ */}
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";

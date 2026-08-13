@@ -6,6 +6,8 @@ type Role = "super_admin" | "store_manager" | "fulfillment";
 
 const NAV_ITEMS: { to: string; label: string; end?: boolean; roles: Role[] }[] = [
   { to: "/admin", label: "Dashboard", end: true, roles: ["super_admin", "store_manager", "fulfillment"] },
+  { to: "/admin/analytics", label: "Analytics", roles: ["super_admin"] },
+  { to: "/admin/homepage-layout", label: "Homepage layout", roles: ["super_admin"] },
   { to: "/admin/products", label: "Products", roles: ["super_admin", "store_manager"] },
   { to: "/admin/categories", label: "Categories", roles: ["super_admin", "store_manager"] },
   { to: "/admin/customers", label: "Customers", roles: ["super_admin", "store_manager"] },
