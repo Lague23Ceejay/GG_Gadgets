@@ -39,12 +39,21 @@ export const create = async (req, res) => {
   try {
     const mod = await import('../models/customers.model.js');
     const CustomerModel = mod.default ?? mod;
+
     const { full_name, email, phone, metadata } = req.body || {};
+
     if (!full_name) {
       return res.status(400).json({ error: 'full_name is required' });
     }
+
     try {
-      const newId = await CustomerModel.createCustomer({ full_name, email, phone, metadata: metadata ?? {} });
+      const newId = await CustomerModel.createCustomer({
+        full_name,
+        email,
+        phone,
+        metadata: metadata ?? {}
+      });
+
       return res.status(201).json({ customer_id: newId });
     } catch (err) {
       if (err.code === '23505' && email) {

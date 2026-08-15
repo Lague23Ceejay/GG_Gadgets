@@ -131,8 +131,10 @@ export function AdminProducts() {
       price: Number(form.price),
       stock: Number(form.stock),
       attributes,
-      sku: form.sku || null,
-      barcode: form.barcode || null,
+      payload: {
+        sku: form.sku || null,
+        barcode: form.barcode || null,
+      },
     };
     // category_id intentionally omitted — categories are now managed as a
     // many-to-many set via the separate assign/remove endpoints below,
