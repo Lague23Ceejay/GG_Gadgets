@@ -26,37 +26,53 @@ export const getOne = async (req, res) => {
 };
 
 export const create = async (req, res) => {
-  const mod = await import('../models/products.model.js');
-  const ProductModel = mod.default ?? mod;
-  const payload = req.validatedProduct ?? req.body;
-
-  // Stored procedure returns new_id (integer)
-  const newProductId = await ProductModel.createProduct(payload);
-
-  res.status(201).json({ product_id: newProductId });
-
-  logActivity(req.user, "Created product", { product_id: newProductId, name: payload.name });
-};
-
-export const update = async (req, res) => {
   try {
     const mod = await import('../models/products.model.js');
     const ProductModel = mod.default ?? mod;
     const payload = req.validatedProduct ?? req.body;
 
+    const newProductId = await ProductModel.createProduct(payload);
+    res.status(201).json({ product_id: newProductId });
+  } catch (err) {
+    if (err.code === '23505' && err.constraint === 'products_barcode_unique') {
+      return res.status(409).json({ error: 'That barcode is already assigned to another product.' });
+    }
+    console.error('Error creating product:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const update = async (req, res) => {
+  try {
+    const mod = await import("../models/products.model.js");
+    const ProductModel = mod.default ?? mod;
+    const payload = req.validatedProduct ?? req.body;
+
     const id = Number.parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid product id' });
+      return res.status(400).json({ error: "Invalid product id" });
     }
 
     const success = await ProductModel.updateProduct(id, payload);
 
     res.json({ success });
-    logActivity(req.user, "Updated product", { product_id: id, name: payload.name });
 
+    if (success) {
+      await logActivity(req.user, "Updated product", {
+        product_id: id,
+        name: payload.name,
+      });
+    }
   } catch (err) {
-    console.error('Error updating product:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    // Handle barcode uniqueness violation the same way as in create
+    if (err.code === "23505" && err.constraint === "products_barcode_unique") {
+      return res
+        .status(409)
+        .json({ error: "That barcode is already assigned to another product." });
+    }
+
+    console.error("Error updating product:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

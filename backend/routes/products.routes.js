@@ -4,6 +4,7 @@ import { validateNumeric } from '../middleware/validateId.js';
 import validateProduct from '../middleware/validateProduct.js';
 import verifyToken from '../middleware/verifyToken.js';
 import { requireRole } from '../middleware/requireRole.js';
+import { lookup } from '../controllers/barcodeLookup.controller.js';
 
 const router = express.Router();
 
@@ -31,6 +32,8 @@ router.put(
   validateProduct,
   controller.update
 );
+// BARCODE lookup (admin-only)
+router.get('/barcode-lookup', verifyToken, requireRole('super_admin', 'store_manager'), lookup);
 
 // ARCHIVE product (admin-only)
 router.delete(

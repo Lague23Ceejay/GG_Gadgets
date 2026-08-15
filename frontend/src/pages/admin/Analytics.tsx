@@ -12,7 +12,7 @@ const CHART_COLORS = ["#5B5FEF", "#FFD23F", "#22C55E", "#EF4444", "#0EA5E9", "#F
 
 type SortKey = "name" | "units_sold" | "revenue" | "avg_price";
 
-export function AdminAnalytics() {
+export function SalesAnalyticsSection() {
   const [data, setData] = useState<AnalyticsOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
@@ -95,10 +95,14 @@ export function AdminAnalytics() {
     ],
   };
 
-  return (
-    <div>
-      <h1 className="font-display text-2xl font-700">Sales analytics</h1>
-      <p className="mt-1 text-sm text-zinc-500">Super Admin only.</p>
+ return (
+  <div>
+    <div className="mb-4 flex items-center gap-3">
+      <h2 className="font-display text-lg font-700">Sales analytics</h2>
+      <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+    </div>
+
+    {/* Row 1: KPI cards */}
 
       {/* Row 1: KPI cards */}
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">

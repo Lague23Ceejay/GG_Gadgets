@@ -97,7 +97,7 @@ export function Home() {
             return (
               <ShowcaseSection
                 key="best_sellers"
-                title="Best sellers"
+                title="Best sellers and new arrivals!"
                 subtitle="What everyone's actually buying."
                 products={featured}
               />

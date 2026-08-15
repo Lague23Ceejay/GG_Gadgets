@@ -1,27 +1,9 @@
 import db from "../config/db.js";
 
 // ✅ Create Product
-export const createProduct = async ({
-  name,
-  description,
-  price,
-  stock,
-  category_id,
-  attributes
-}) => {
-  const query = `
-    CALL gs_schema.sp_create_product($1, $2, $3, $4, $5, $6, NULL);
-  `;
-
-  const { rows } = await db.query(query, [
-    name,
-    description,
-    price,
-    stock,
-    category_id,
-    attributes
-  ]);
-
+export const createProduct = async ({ name, description, price, stock, category_id, attributes, sku, barcode }) => {
+  const query = `CALL gs_schema.sp_create_product($1, $2, $3, $4, $5, $6, $7, $8, NULL);`;
+  const { rows } = await db.query(query, [name, description, price, stock, category_id, attributes, sku ?? null, barcode ?? null]);
   return rows[0] ?? null;
 };
 
@@ -47,31 +29,9 @@ export const getAllProducts = async () => {
 
 // ✅ Update Product
 export const updateProduct = async (id, payload) => {
-  const {
-    name,
-    description,
-    price,
-    stock,
-    category_id,
-    attributes
-  } = payload;
-
-  const query = `
-  CALL gs_schema.sp_update_product(
-    $1, $2, $3, $4, $5, $6, $7, NULL
-  );
-`;
-
-  const { rows } = await db.query(query, [
-    id,
-    name,
-    description,
-    price,
-    stock,
-    category_id,
-    attributes
-  ]);
-
+  const { name, description, price, stock, category_id, attributes, sku, barcode } = payload;
+  const query = `CALL gs_schema.sp_update_product($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL);`;
+  const { rows } = await db.query(query, [id, name, description, price, stock, category_id, attributes, sku ?? null, barcode ?? null]);
   return rows[0]?.success ?? false;
 };
 

@@ -23,7 +23,6 @@ import { OrderHistory } from "@/pages/storefront/OrderHistory";
 import { AdminSettings } from "@/pages/admin/Settings";
 import { AdminRewards } from "@/pages/admin/Rewards";
 import { AdminHomepageLayout } from "@/pages/admin/HomepageLayout";
-import { AdminAnalytics } from "@/pages/admin/Analytics";
 
 export function App() {
   return (
@@ -52,15 +51,6 @@ export function App() {
         }
       >
 
-        <Route
-          path="analytics"
-          element={
-            <RoleRoute allowedRoles={["super_admin"]}>
-              <AdminAnalytics />
-            </RoleRoute>
-          }
-        />
-        
           <Route
               path="events"
               element={

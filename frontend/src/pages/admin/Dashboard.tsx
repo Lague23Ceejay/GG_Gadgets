@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { api } from "@/lib/api";
 import type { Product, Order, Customer } from "@/types";
+import { useAuth } from "@/context/AuthContext";
+import { lazy, Suspense } from "react";
+
+const SalesAnalyticsSection = lazy(() =>
+  import("@/pages/admin/Analytics").then((m) => ({ default: m.SalesAnalyticsSection }))
+);
 
 export function Dashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     Promise.all([
@@ -55,6 +62,15 @@ export function Dashboard() {
               </Card>
             ))}
       </div>
+      {user?.role === "super_admin" && (
+        <div className="mt-8">
+          <Suspense fallback={<p className="text-sm text-zinc-500">Loading analytics…</p>}>
+            <SalesAnalyticsSection />
+          </Suspense>
+        </div>
+      )}
     </div>
+      
+
   );
 }

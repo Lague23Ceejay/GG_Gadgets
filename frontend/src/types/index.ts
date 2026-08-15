@@ -18,6 +18,8 @@ export interface Product {
   images?: ProductImage[];
   created_at: string;
   updated_at: string;
+  sku?: string | null;
+  barcode?: string | null;
 }
 
 export interface Category {

@@ -18,6 +18,8 @@ const emptyForm = {
   featured: false,
   discountType: "none" as DiscountType,
   discountValue: "",
+  sku: "",
+  barcode: "",
 };
 
 export function AdminProducts() {
@@ -33,6 +35,8 @@ export function AdminProducts() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -74,6 +78,8 @@ export function AdminProducts() {
         : salePrice
           ? String(salePrice)
           : "",
+      sku: product.sku ?? "",
+      barcode: product.barcode ?? "",
     });
 
     const existingIds = (product.categories ?? []).map((c) => c.category_id);
@@ -125,6 +131,8 @@ export function AdminProducts() {
       price: Number(form.price),
       stock: Number(form.stock),
       attributes,
+      sku: form.sku || null,
+      barcode: form.barcode || null,
     };
     // category_id intentionally omitted — categories are now managed as a
     // many-to-many set via the separate assign/remove endpoints below,
@@ -248,6 +256,56 @@ export function AdminProducts() {
                 value={form.stock}
                 onChange={(e) => setForm({ ...form, stock: e.target.value })}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="sku">SKU (optional)</Label>
+              <Input
+                id="sku"
+                value={form.sku}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                placeholder="Your own inventory code"
+              />
+            </div>
+            <div>
+              <Label htmlFor="barcode">Barcode (optional)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="barcode"
+                  value={form.barcode}
+                  onChange={(e) => setForm({ ...form, barcode: e.target.value })}
+                  placeholder="UPC/EAN printed on the box"
+                />
+                <Button type="button" variant="secondary" size="sm" onClick={() => setShowScanner(true)}>
+                  📷 Scan
+                </Button>
+              </div>
+              {form.barcode && (
+                <button
+                  type="button"
+                  disabled={lookingUp}
+                  onClick={async () => {
+                    setLookingUp(true);
+                    try {
+                      const result = await api.get<{ title: string | null; description: string | null }>(
+                        `/products/barcode-lookup?code=${encodeURIComponent(form.barcode)}`
+                      );
+                      setForm((prev) => ({
+                        ...prev,
+                        name: prev.name || result.title || prev.name,
+                        description: prev.description || result.description || prev.description,
+                      }));
+                    } catch {
+                      // No match or lookup unavailable — fine, admin fills in manually
+                    } finally {
+                      setLookingUp(false);
+                    }
+                  }}
+                  className="mt-1 text-xs text-accent-500 hover:underline disabled:opacity-50"
+                >
+                  {lookingUp ? "Looking up…" : "Try auto-fill from this barcode"}
+                </button>
+              )}
             </div>
 
             <div>
