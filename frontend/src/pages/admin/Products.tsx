@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { ProductImageManager } from "@/pages/admin/ProductImageManager";
+import { BarcodeScanner } from "@/pages/admin/BarcodeScanner";
 
 type DiscountType = "none" | "flat" | "percent";
 
@@ -131,10 +132,8 @@ export function AdminProducts() {
       price: Number(form.price),
       stock: Number(form.stock),
       attributes,
-      payload: {
         sku: form.sku || null,
         barcode: form.barcode || null,
-      },
     };
     // category_id intentionally omitted — categories are now managed as a
     // many-to-many set via the separate assign/remove endpoints below,
@@ -385,6 +384,16 @@ export function AdminProducts() {
                 </Button>
               </div>
             </div>
+
+            {showScanner && (
+              <BarcodeScanner
+                onScan={(code) => {
+                  setForm((prev) => ({ ...prev, barcode: code }));
+                  setShowScanner(false);
+                }}
+                onClose={() => setShowScanner(false)}
+              />
+            )}
 
             {error && <p className="text-sm text-danger-500 sm:col-span-2">{error}</p>}
 
