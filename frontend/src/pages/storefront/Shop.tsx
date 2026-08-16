@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import type { Product, Category } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { hasActiveSale } from "@/lib/pricing";
 
 export function Shop() {
@@ -18,6 +18,9 @@ export function Shop() {
   const [activeTab, setActiveTab] = useState<"all" | "sale">(
   searchParams.get("tab") === "sale" ? "sale" : "all"
 );
+  const eventCategories = searchParams.get("category")?.split(",").filter(Boolean) ?? [];
+  const eventProductIds = searchParams.get("products")?.split(",").map(Number).filter((n) => !isNaN(n)) ?? [];
+  const hasEventFilter = eventCategories.length > 0 || eventProductIds.length > 0;
 
   useEffect(() => {
     Promise.all([productsApi.list(), api.get<Category[]>("/categories")])
@@ -29,23 +32,42 @@ export function Shop() {
       .finally(() => setLoading(false));
   }, []);
 
+  
+
   const filteredProducts = useMemo(() => {
   const query = search.trim().toLowerCase();
 
+  {hasEventFilter && (
+  <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+    <div className="flex items-center justify-between rounded-lg bg-accent-50 px-4 py-2 text-sm dark:bg-accent-500/10">
+      <span className="text-accent-700 dark:text-accent-300">Showing items from a featured promotion</span>
+      <Link to="/shop" className="text-accent-500 hover:underline">Clear filter</Link>
+    </div>
+  </div>
+)}
+
   return products.filter((product) => {
-      const matchesSearch =
-        !query ||
-        product.name.toLowerCase().includes(query) ||
-        (product.description ?? "").toLowerCase().includes(query);
+    if (hasEventFilter) {
+      const matchesEventCategory = eventCategories.length > 0 &&
+        (product.categories ?? []).some((c) => eventCategories.includes(c.name));
+      const matchesEventProduct = eventProductIds.includes(product.product_id);
+      return matchesEventCategory || matchesEventProduct;
+    }
 
-      const matchesCategory =
-        !activeCategory || (product.categories ?? []).some((c) => c.name === activeCategory);
+    const matchesSearch =
+      !query ||
+      product.name.toLowerCase().includes(query) ||
+      (product.description ?? "").toLowerCase().includes(query);
 
-      const matchesTab = activeTab === "all" || hasActiveSale(product);
+    const matchesCategory =
+      !activeCategory || (product.categories ?? []).some((c) => c.name === activeCategory);
 
-          return matchesSearch && matchesCategory && matchesTab;
-        });
-      }, [products, search, activeCategory, activeTab]);
+    const matchesTab = activeTab === "all" || hasActiveSale(product);
+
+    return matchesSearch && matchesCategory && matchesTab;
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [products, search, activeCategory, activeTab, hasEventFilter]);
 
   return (
     <div>

@@ -1,5 +1,8 @@
 import * as AnalyticsModel from "../models/analytics.model.js";
-
+{/**
+ * Controller for analytics-related endpoints.
+ * Handles requests for overview and category detail analytics.
+ */}
 export const getOverview = async (req, res) => {
   try {
     const [kpis, categoryBreakdown, productTable, rewardsTable] = await Promise.all([
@@ -14,7 +17,10 @@ export const getOverview = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
+{/**
+ * Controller for fetching detailed analytics for a specific category.
+ * Validates the category ID and retrieves the corresponding data.
+ */}
 export const getCategoryDetail = async (req, res) => {
   try {
     const id = Number.parseInt(req.params.id, 10);

@@ -1,5 +1,8 @@
 import { getActivityLogs } from "../models/activityLog.model.js";
-
+{/**
+ * Controller for activity log-related endpoints.
+ * Handles requests for retrieving all activity logs.
+ */}
 export const getAll = async (req, res) => {
   try {
     const data = await getActivityLogs();

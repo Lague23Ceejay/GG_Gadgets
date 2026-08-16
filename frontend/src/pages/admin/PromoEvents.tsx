@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
+import { ProductLinkPicker } from "@/pages/admin/ProductLinkPicker";
 
 const emptyForm = {
   title: "",
@@ -182,13 +183,10 @@ export function AdminPromoEvents() {
               />
             </div>
 
-            <div>
-              <Label htmlFor="link_url">Link to (optional)</Label>
-              <Input
-                id="link_url"
+            <div className="sm:col-span-2">
+              <ProductLinkPicker
                 value={form.link_url}
-                onChange={(e) => setForm({ ...form, link_url: e.target.value })}
-                placeholder="e.g. /shop or /products/12"
+                onChange={(url) => setForm({ ...form, link_url: url })}
               />
             </div>
 

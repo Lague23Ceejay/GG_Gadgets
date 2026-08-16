@@ -1,3 +1,8 @@
+{/**
+ * Database configuration and connection setup.
+ * Uses the 'pg' package to create a connection pool for PostgreSQL.
+ * Environment variables are loaded using 'dotenv'.
+ */}
 import pkg from "pg";
 import dotenv from "dotenv";
 

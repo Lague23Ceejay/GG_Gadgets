@@ -6,14 +6,14 @@ import db from "../config/db.js";
 // after being printed so they're visible in Render logs but harmless.
 export const logActivity = (user, action, details = {}) => {
   if (!user) return;
-
+  // Log the activity asynchronously without awaiting the result
   const query = `CALL gs_schema.sp_log_activity($1, $2, $3, $4, $5);`;
 
   db.query(query, [user.user_id, user.username, user.role, action, details]).catch((err) => {
     console.error("Failed to write activity log:", err);
   });
 };
-
+// Retrieves all activity logs from the database.
 export const getActivityLogs = async () => {
   const { rows } = await db.query(`CALL gs_schema.sp_get_activity_logs(NULL, NULL);`);
   return rows[0]?.result ?? [];
