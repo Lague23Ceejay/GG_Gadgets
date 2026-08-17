@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/Badge";
 import type { CustomerOrderHistory, OrderStatus } from "@/types";
 import { ordersApi } from "@/lib/orders";
 
-const [cancellingId, setCancellingId] = useState<number | null>(null);
-
 const STATUS_TONE: Record<OrderStatus, "spark" | "success" | "danger"> = {
   pending: "spark",
   completed: "success",
@@ -20,6 +18,7 @@ export function OrderHistory() {
   const [data, setData] = useState<CustomerOrderHistory | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
 
   
   const handleSubmit = async (e: React.FormEvent) => {
