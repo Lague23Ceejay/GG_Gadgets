@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import type { CustomerOrderHistory, OrderStatus } from "@/types";
+import { ordersApi } from "@/lib/orders";
+
+const [cancellingId, setCancellingId] = useState<number | null>(null);
 
 const STATUS_TONE: Record<OrderStatus, "spark" | "success" | "danger"> = {
   pending: "spark",
@@ -18,6 +21,7 @@ export function OrderHistory() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -35,6 +39,20 @@ export function OrderHistory() {
       setLoading(false);
     }
   };
+
+  const handleCancel = async (orderId: number) => {
+  if (!confirm('Cancel this order?')) return;
+  setCancellingId(orderId);
+  try {
+    await ordersApi.customerCancel(orderId, email);
+    const refreshed = await api.get<CustomerOrderHistory>(`/settings/order-history?email=${encodeURIComponent(email)}`);
+    setData(refreshed);
+  } catch (err) {
+    setError(err instanceof ApiError ? err.message : 'Could not cancel this order.');
+  } finally {
+    setCancellingId(null);
+  }
+};
 
   const downloadCsv = () => {
     if (!data) return;
@@ -117,11 +135,21 @@ export function OrderHistory() {
           </div>
 
           <div className="mt-3 flex flex-col gap-3">
-            {data.orders.map((order) => (
+            {(data.orders ?? []).map((order) => (
               <Card key={order.order_id} className="p-4">
                 <div className="flex items-center justify-between">
                   <p className="font-mono font-medium">#{order.order_id}</p>
-                  <Badge tone={STATUS_TONE[order.order_status]}>{order.order_status}</Badge>
+                  <Badge tone={STATUS_TONE[order.order_status]}>{order.order_status}
+                  {order.order_status === 'pending' && (
+                    <button
+                      onClick={() => handleCancel(order.order_id)}
+                      disabled={cancellingId === order.order_id}
+                      className="ml-2 text-xs text-danger-500 hover:underline disabled:opacity-50"
+                    >
+                      {cancellingId === order.order_id ? 'Cancelling…' : 'Cancel order'}
+                    </button>
+                  )}
+                  </Badge>
                 </div>
                 <p className="mt-1 text-xs text-zinc-500">
                   {new Date(order.created_at).toLocaleDateString()} · {order.payment_method ?? "—"}

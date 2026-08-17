@@ -120,3 +120,14 @@ export const deleteItem = async (req, res) => {
 
   res.json({ success });
 };
+
+export const customerCancel = async (req, res) => {
+  const orderId = Number.parseInt(req.params.id, 10);
+  const { email } = req.body || {};
+  if (Number.isNaN(orderId) || !email) {
+    return res.status(400).json({ error: 'Order id and email are required' });
+  }
+  const result = await OrderModel.customerCancelOrder(orderId, email);
+  if (!result.success) return res.status(400).json({ error: result.error });
+  res.json(result);
+};

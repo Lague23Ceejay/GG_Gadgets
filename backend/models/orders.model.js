@@ -86,5 +86,10 @@ const OrderModel = {
     return rows[0]?.success ?? false;
   }
 };
+// ✅ Customer Cancel Order
+export const customerCancelOrder = async (orderId, email) => {
+  const { rows } = await db.query(`CALL gs_schema.sp_customer_cancel_order($1, $2, NULL);`, [orderId, email]);
+  return rows[0]?.result ?? { success: false, error: 'Unknown error' };
+};
 
 export default OrderModel;

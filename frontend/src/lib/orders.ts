@@ -16,4 +16,6 @@ export const ordersApi = {
     price_each: number;
     details?: Record<string, unknown>;
   }) => api.post<{ order_item_id: number }>("/orders/items", payload),
+  customerCancel: (orderId: number, email: string) =>
+  api.post<{ success: boolean }>(`/orders/${orderId}/customer-cancel`, { email }),
 };

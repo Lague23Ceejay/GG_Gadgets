@@ -28,6 +28,7 @@ router.get('/track', controller.track);
 router.get('/:id', verifyToken, CAN_VIEW, validateNumeric('id'), controller.getOne);
 router.post('/', verifyToken, CAN_EDIT_ITEMS, validateOrder, controller.create);
 
+
 router.put(
   '/:id/status',
   verifyToken,
@@ -45,5 +46,6 @@ router.delete('/:id', verifyToken, CAN_ARCHIVE, validateNumeric('id'), controlle
 
 router.post('/items', verifyToken, CAN_EDIT_ITEMS, validateOrderItem, controller.addItem);
 router.delete('/items/:id', verifyToken, CAN_EDIT_ITEMS, validateNumeric('id'), controller.deleteItem);
+router.post('/:id/customer-cancel', controller.customerCancel);
 
 export default router;
