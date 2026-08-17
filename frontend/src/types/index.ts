@@ -56,6 +56,7 @@ export interface Order {
   customer_id: number;
   customer_name?: string; // present on list view
   order_status: OrderStatus;
+  order_source?: "in_store" | "online";
   total_amount: number;
   extra: Record<string, unknown>;
   customer?: { full_name: string; email: string; phone: string | null }; // present on detail view

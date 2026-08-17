@@ -162,7 +162,12 @@ export function AdminOrders() {
               <Fragment key={order.order_id}>
                 <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60">
                   <td className="px-4 py-3">
-                    <p className="font-mono font-medium">#{order.order_id}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-mono font-medium">#{order.order_id}</p>
+                      <Badge tone={order.order_source === "in_store" ? "neutral" : "accent"}>
+                        {order.order_source === "in_store" ? "In-Store" : "Online"}
+                      </Badge>
+                    </div>
                     <p className="text-xs text-zinc-500">{order.customer_name}</p>
                   </td>
                   <td className="px-4 py-3">
