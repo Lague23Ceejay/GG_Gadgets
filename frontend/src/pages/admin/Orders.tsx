@@ -28,6 +28,8 @@ export function AdminOrders() {
   const [itemForm, setItemForm] = useState(emptyItemForm);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
+  const visibleOrders = statusFilter === "all" ? orders : orders.filter((o) => o.order_status === statusFilter);
 
   const load = () => {
     setLoading(true);
@@ -132,6 +134,22 @@ export function AdminOrders() {
     <div>
       <h1 className="font-display text-2xl font-700">Orders</h1>
       <p className="mt-1 text-sm text-zinc-500">{orders.length} total</p>
+
+      <div className="mt-4 flex gap-2">
+        {(["all", "pending", "completed", "cancelled"] as const).map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition-theme ${
+              statusFilter === status
+                ? "bg-accent-500 text-white"
+                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
+            }`}
+          >
+            {status} {status !== "all" && `(${orders.filter((o) => o.order_status === status).length})`}
+          </button>
+        ))}
+      </div>
 
       <Card className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">

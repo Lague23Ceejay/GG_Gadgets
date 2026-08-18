@@ -4,9 +4,9 @@ A full-stack e-commerce platform for a gadgets/electronics retailer: a public st
 browsing and checkout, and a role-gated admin panel for managing products, orders, customers,
 inventory, staff accounts, and homepage promotions.
 
-Built as an academic capstone/thesis project, structured with production-grade practices:
+Built as an academic Advance Database project, structured with production-grade practices:
 role-based access control, audit logging, database-level data integrity (triggers, stored
-procedures, constraints), and a real three-service cloud deployment.
+procedures, constraints), and a real three-service(now four for email-api 'Resend') cloud deployment.
 
 ---
 

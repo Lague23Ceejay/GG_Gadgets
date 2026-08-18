@@ -88,6 +88,8 @@ export interface PromoEvent {
   is_active?: boolean;
   created_at: string;
   updated_at?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
 }
 
 export interface ActivityLog {

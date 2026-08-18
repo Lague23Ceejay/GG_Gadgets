@@ -14,6 +14,8 @@ const emptyForm = {
   discount_percent: "",
   link_url: "",
   is_active: true,
+  starts_at: "",
+  ends_at: "",
 };
 
 export function AdminPromoEvents() {
@@ -54,10 +56,13 @@ export function AdminPromoEvents() {
       discount_percent: event.discount_percent ? String(event.discount_percent) : "",
       link_url: event.link_url ?? "",
       is_active: event.is_active ?? true,
+      starts_at: event.starts_at ? event.starts_at.slice(0, 16) : "",
+      ends_at: event.ends_at ? event.ends_at.slice(0, 16) : "",
     });
     setImageUrl(event.image_url);
     setError(null);
     setShowForm(true);
+    
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +105,8 @@ export function AdminPromoEvents() {
       discount_percent: form.discount_percent ? Number(form.discount_percent) : null,
       link_url: form.link_url || null,
       is_active: form.is_active,
+      starts_at: form.starts_at || null,
+      ends_at: form.ends_at || null,
     };
 
     try {
@@ -214,6 +221,25 @@ export function AdminPromoEvents() {
               >
                 {uploading ? "Uploading…" : imageUrl ? "Replace image" : "+ Upload image"}
               </Button>
+            </div>
+
+            <div>
+              <Label htmlFor="starts_at">Starts (optional — blank launches immediately)</Label>
+              <Input
+                id="starts_at"
+                type="datetime-local"
+                value={form.starts_at}
+                onChange={(e) => setForm({ ...form, starts_at: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ends_at">Ends (optional — blank runs indefinitely)</Label>
+              <Input
+                id="ends_at"
+                type="datetime-local"
+                value={form.ends_at}
+                onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
+              />
             </div>
 
             <div className="flex items-center gap-2 sm:col-span-2">

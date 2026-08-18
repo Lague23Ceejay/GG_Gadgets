@@ -10,20 +10,22 @@ export const getAllEvents = async () => {
   return rows[0]?.result ?? [];
 };
 
-export const createEvent = async ({ title, description, image_url, discount_percent, link_url, is_active }) => {
-  const query = `CALL gs_schema.sp_create_promo_event($1, $2, $3, $4, $5, $6, NULL);`;
+export const createEvent = async ({ title, description, image_url, discount_percent, link_url, is_active, starts_at, ends_at }) => {
+  const query = `CALL gs_schema.sp_create_promo_event($1, $2, $3, $4, $5, $6, $7, $8, NULL);`;
   const { rows } = await db.query(query, [
     title, description ?? null, image_url,
-    discount_percent ?? null, link_url ?? null, is_active ?? true
+    discount_percent ?? null, link_url ?? null, is_active ?? true,
+    starts_at ?? null, ends_at ?? null
   ]);
   return rows[0]?.new_id ?? null;
 };
 
-export const updateEvent = async (id, { title, description, image_url, discount_percent, link_url, is_active }) => {
-  const query = `CALL gs_schema.sp_update_promo_event($1, $2, $3, $4, $5, $6, $7, NULL);`;
+export const updateEvent = async (id, { title, description, image_url, discount_percent, link_url, is_active, starts_at, ends_at }) => {
+  const query = `CALL gs_schema.sp_update_promo_event($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL);`;
   const { rows } = await db.query(query, [
     id, title, description ?? null, image_url,
-    discount_percent ?? null, link_url ?? null, is_active ?? true
+    discount_percent ?? null, link_url ?? null, is_active ?? true,
+    starts_at ?? null, ends_at ?? null
   ]);
   return rows[0]?.success ?? false;
 };

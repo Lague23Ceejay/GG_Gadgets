@@ -21,8 +21,14 @@ export function EventsCarousel() {
   const goPrev = () => setIndex((i) => (i === 0 ? events.length - 1 : i - 1));
   const goNext = () => setIndex((i) => (i === events.length - 1 ? 0 : i + 1));
 
-  const Wrapper = current.link_url ? Link : "div";
-  const wrapperProps = current.link_url ? { to: current.link_url } : {};
+  const eventLinkTo = current.link_url
+    ? `${current.link_url}${current.link_url.includes("?") ? "&" : "?"}event=${encodeURIComponent(
+        current.title
+      )}&event_id=${current.event_id}`
+    : undefined;
+
+  const Wrapper = eventLinkTo ? Link : "div";
+  const wrapperProps = eventLinkTo ? { to: eventLinkTo } : {};
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
@@ -46,6 +52,17 @@ export function EventsCarousel() {
               <h3 className="font-display text-2xl font-700 text-white sm:text-3xl">
                 {current.title}
               </h3>
+
+              {(current.starts_at || current.ends_at) && (
+                <p className="mb-1 text-xs text-white/70">
+                  {current.starts_at && new Date(current.starts_at) > new Date()
+                    ? `Starts ${new Date(current.starts_at).toLocaleString()}`
+                    : current.ends_at
+                    ? `Ends ${new Date(current.ends_at).toLocaleString()}`
+                    : ""}
+                </p>
+              )}
+
               {current.description && (
                 <p className="mt-1 max-w-xl text-sm text-white/80 sm:text-base">
                   {current.description}
