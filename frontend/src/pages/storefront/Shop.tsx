@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import type { Product, Category } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { hasActiveSale } from "@/lib/pricing";
 import AccordionGallery from "@/components/storefront/AccordionGallery";
 
@@ -70,6 +70,18 @@ export function Shop() {
 
   return (
     <div>
+      {/* Banner: shown when an event filter exists but user is not currently viewing the event tab */}
+      {hasEventFilter && activeTab !== "event" && (
+        <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+          <div className="flex items-center justify-between rounded-lg bg-accent-50 px-4 py-2 text-sm dark:bg-accent-500/10">
+            <span className="text-accent-700 dark:text-accent-300">You've left the featured promotion view.</span>
+            <button onClick={() => setActiveTab("event")} className="text-accent-500 hover:underline">
+              Back to event
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

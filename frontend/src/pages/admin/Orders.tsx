@@ -169,14 +169,14 @@ export function AdminOrders() {
                 </td>
               </tr>
             )}
-            {!loading && orders.length === 0 && (
+            {!loading && visibleOrders.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
                   No orders yet.
                 </td>
               </tr>
             )}
-            {orders.map((order) => (
+            {visibleOrders.map((order) => (
               <Fragment key={order.order_id}>
                 <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60">
                   <td className="px-4 py-3">
