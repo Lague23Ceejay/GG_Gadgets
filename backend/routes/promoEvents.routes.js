@@ -15,5 +15,7 @@ router.get("/admin", verifyToken, requireRole("super_admin", "store_manager"), c
 router.post("/", verifyToken, requireRole("super_admin", "store_manager"), controller.create);
 router.put("/:id", verifyToken, requireRole("super_admin", "store_manager"), validateNumeric("id"), controller.update);
 router.delete("/:id", verifyToken, requireRole("super_admin", "store_manager"), validateNumeric("id"), controller.archive);
+router.post("/:id/products", verifyToken, requireRole("super_admin", "store_manager"), controller.setProduct);
+router.delete("/:id/products/:productId", verifyToken, requireRole("super_admin", "store_manager"), controller.removeProduct);
 
 export default router;

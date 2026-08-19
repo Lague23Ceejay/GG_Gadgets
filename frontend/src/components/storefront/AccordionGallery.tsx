@@ -32,6 +32,8 @@ const AccordionGallery = ({
   showLabels = true,
   grayscale = true,
   className = "",
+  autoPlay = false,
+  autoPlayInterval = 3000,
 }) => {
   const rootRef = useRef(null);
   const panelRefs = useRef([]);
@@ -110,6 +112,15 @@ const AccordionGallery = ({
     [active, count, expandRatio, duration, ease, vertical, tilt, parallax, grayscale, showLabels, stagger, prefersReduced]
   );
 
+  // Autoplay effect
+  useEffect(() => {
+    if (!autoPlay || count <= 1 || prefersReduced) return;
+    const id = setInterval(() => {
+      setActive((prev) => (prev + 1) % count);
+    }, autoPlayInterval);
+    return () => clearInterval(id);
+  }, [autoPlay, autoPlayInterval, count, prefersReduced]);
+
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -185,7 +196,7 @@ const AccordionGallery = ({
             className={`ag-panel${isActive ? " ag-panel--active" : ""}`}
             style={{ borderRadius: `${radius}px` }}
             href={item.link || undefined}
-            onClick={(e) => handleClick(i, e)}
+            onClick={(e) => { handleClick(i, e); item.onClick?.(e); }}
             onMouseEnter={() => handleEnter(i)}
             onFocus={() => setActive(i)}
             onKeyDown={(e) => handleKeyDown(i, e)}

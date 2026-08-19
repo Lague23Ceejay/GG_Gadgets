@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { ProductImageManager } from "@/pages/admin/ProductImageManager";
-import { BarcodeScanner } from "@/pages/admin/BarcodeScanner";
+import { BarcodeScanner } from "@/components/admin/BarcodeScanner";
 
 type DiscountType = "none" | "flat" | "percent";
 

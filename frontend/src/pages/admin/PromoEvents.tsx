@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { upload } from "@vercel/blob/client";
-import { promoEventsApi } from "@/lib/promoEvents";
+// pages/admin/AdminPromoEvents.tsx
 import type { PromoEvent } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { ProductLinkPicker } from "@/pages/admin/ProductLinkPicker";
+import { EventProductDiscountPicker } from "@/components/admin/EventProductDiscountPicker";
+import { useEffect, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
+import { promoEventsApi } from "@/lib/promoEvents";
 
 const emptyForm = {
   title: "",
@@ -30,6 +31,10 @@ export function AdminPromoEvents() {
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // NEW STATE for event products
+  const [eventProducts, setEventProducts] = useState<{ product_id: number; discount_percent: number }[]>([]);
+  const [originalEventProducts, setOriginalEventProducts] = useState<{ product_id: number; discount_percent: number }[]>([]);
+
   const load = () => {
     setLoading(true);
     promoEventsApi
@@ -45,6 +50,8 @@ export function AdminPromoEvents() {
     setForm(emptyForm);
     setImageUrl(null);
     setError(null);
+    setEventProducts([]);
+    setOriginalEventProducts([]);
     setShowForm(true);
   };
 
@@ -61,8 +68,16 @@ export function AdminPromoEvents() {
     });
     setImageUrl(event.image_url);
     setError(null);
+
+    // NEW: populate products
+    const existing = (event.products ?? []).map((p) => ({
+      product_id: p.product_id,
+      discount_percent: p.discount_percent,
+    }));
+    setEventProducts(existing);
+    setOriginalEventProducts(existing);
+
     setShowForm(true);
-    
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,11 +125,26 @@ export function AdminPromoEvents() {
     };
 
     try {
+      let eventId: number;
       if (editingId) {
         await promoEventsApi.update(editingId, payload);
+        eventId = editingId;
       } else {
-        await promoEventsApi.create(payload);
+        const created = await promoEventsApi.create(payload);
+        eventId = created.event_id;
       }
+
+      // NEW: sync products
+      const toSet = eventProducts;
+      const toRemove = originalEventProducts.filter(
+        (op) => !eventProducts.some((np) => np.product_id === op.product_id)
+      );
+
+      await Promise.all([
+        ...toSet.map((p) => promoEventsApi.setProduct(eventId, p.product_id, p.discount_percent)),
+        ...toRemove.map((p) => promoEventsApi.removeProduct(eventId, p.product_id)),
+      ]);
+
       setShowForm(false);
       load();
     } catch (err) {
@@ -142,7 +172,8 @@ export function AdminPromoEvents() {
     load();
   };
 
-  return (
+
+    return (
     <div>
       <div className="flex items-center justify-between">
         <div>
@@ -190,10 +221,11 @@ export function AdminPromoEvents() {
               />
             </div>
 
+            {/* Product discount picker */}
             <div className="sm:col-span-2">
-              <ProductLinkPicker
-                value={form.link_url}
-                onChange={(url) => setForm({ ...form, link_url: url })}
+              <EventProductDiscountPicker
+                initialProducts={editingId ? (events.find((e) => e.event_id === editingId)?.products ?? []) : []}
+                onChange={setEventProducts}
               />
             </div>
 

@@ -194,3 +194,27 @@ export interface AnalyticsOverview {
   product_table: ProductSalesRow[];
   rewards_table: RewardAnalyticsRow[];
 }
+
+export interface PromoEventProduct {
+  product_id: number;
+  name: string;
+  price: number;
+  discount_percent: number;
+  image_url: string | null;
+}
+
+export interface PromoEvent {
+  event_id: number;
+  title: string;
+  description: string | null;
+  image_url: string;
+  discount_percent: number | null;
+  link_url: string | null;
+  is_active?: boolean;
+  is_upcoming?: boolean;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  products?: PromoEventProduct[];
+  created_at: string;
+  updated_at?: string;
+}

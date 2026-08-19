@@ -4,7 +4,7 @@ import { productsApi } from "@/lib/products";
 import { api } from "@/lib/api";
 import type { Product, HomepageSectionKey, PublicSettings } from "@/types";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
-import { EventsCarousel } from "@/components/storefront/EventsCarousel";
+import { EventsAccordion } from "@/components/storefront/EventsAccordion";
 
 export function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -83,7 +83,7 @@ export function Home() {
       {!loading &&
         !error &&
         layout.map((key) => {
-          if (key === "events") return <EventsCarousel key="events" />;
+          if (key === "events") return <EventsAccordion autoPlay key="events" />;
           if (key === "on_sale" && onSale.length > 0)
             return (
               <ShowcaseSection

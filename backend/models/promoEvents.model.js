@@ -34,3 +34,19 @@ export const archiveEvent = async (id) => {
   const { rows } = await db.query(`CALL gs_schema.sp_archive_promo_event($1, NULL);`, [id]);
   return rows[0]?.success ?? false;
 };
+
+export const setEventProduct = async (eventId, productId, discountPercent) => {
+  const { rows } = await db.query(
+    `CALL gs_schema.sp_set_event_product($1, $2, $3, NULL);`,
+    [eventId, productId, discountPercent]
+  );
+  return rows[0]?.success ?? false;
+};
+
+export const removeEventProduct = async (eventId, productId) => {
+  const { rows } = await db.query(
+    `CALL gs_schema.sp_remove_event_product($1, $2, NULL);`,
+    [eventId, productId]
+  );
+  return rows[0]?.success ?? false;
+};

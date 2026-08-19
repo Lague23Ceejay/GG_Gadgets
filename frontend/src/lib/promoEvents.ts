@@ -8,4 +8,12 @@ export const promoEventsApi = {
   update: (id: number, payload: Partial<PromoEvent>) =>
     api.put<{ success: boolean }>(`/promo-events/${id}`, payload),
   archive: (id: number) => api.del<{ success: boolean }>(`/promo-events/${id}`),
+  setProduct: (eventId: number, productId: number, discountPercent: number) =>
+  api.post<{ success: boolean }>(`/promo-events/${eventId}/products`, {
+    product_id: productId,
+    discount_percent: discountPercent,
+  }),
+removeProduct: (eventId: number, productId: number) =>
+  api.del<{ success: boolean }>(`/promo-events/${eventId}/products/${productId}`),
 };
+

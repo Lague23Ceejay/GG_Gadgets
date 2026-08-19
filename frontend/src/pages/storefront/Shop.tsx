@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { productsApi } from "@/lib/products";
 import { api } from "@/lib/api";
-import type { Product, Category } from "@/types";
+import type { Product, Category, PromoEvent } from "@/types";
 import { Input } from "@/components/ui/Input";
 import { ProductCard, ProductGridSkeleton } from "@/components/storefront/ProductCard";
 import { useSearchParams } from "react-router-dom";
 import { hasActiveSale } from "@/lib/pricing";
+import { promoEventsApi } from "@/lib/promoEvents";
 import AccordionGallery from "@/components/storefront/AccordionGallery";
+import { EventsAccordion } from "@/components/storefront/EventsAccordion";
 
 export function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,11 +19,9 @@ export function Shop() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const eventCategories = searchParams.get("category")?.split(",").filter(Boolean) ?? [];
-  const eventProductIds =
-    searchParams.get("products")?.split(",").map(Number).filter((n) => !isNaN(n)) ?? [];
-  const eventName = searchParams.get("event");
-  const hasEventFilter = (eventCategories.length > 0 || eventProductIds.length > 0) && !!eventName;
+  const eventId = searchParams.get("event_id");
+  const [eventDetail, setEventDetail] = useState<PromoEvent | null>(null);
+  const hasEventFilter = !!eventDetail;
 
   const [activeTab, setActiveTab] = useState<"all" | "sale" | "event">(
     hasEventFilter ? "event" : "all"
@@ -31,6 +31,17 @@ export function Shop() {
     setActiveTab("all");
     setSearchParams({});
   };
+
+  useEffect(() => {
+    if (!eventId) {
+      setEventDetail(null);
+      return;
+    }
+    promoEventsApi.listActive().then((events) => {
+      const found = events.find((e) => String(e.event_id) === eventId);
+      setEventDetail(found ?? null);
+    });
+  }, [eventId]);
 
   useEffect(() => {
     Promise.all([productsApi.list(), api.get<Category[]>("/categories")])
@@ -48,16 +59,6 @@ export function Shop() {
       !query ||
       product.name.toLowerCase().includes(query) ||
       (product.description ?? "").toLowerCase().includes(query);
-
-    if (activeTab === "event" && hasEventFilter) {
-      return products.filter((product) => {
-        const matchesEventCategory =
-          eventCategories.length > 0 &&
-          (product.categories ?? []).some((c) => eventCategories.includes(c.name));
-        const matchesEventProduct = eventProductIds.includes(product.product_id);
-        return (matchesEventCategory || matchesEventProduct) && matchesSearch(product);
-      });
-    }
 
     return products.filter((product) => {
       const matchesCategory =
@@ -82,6 +83,8 @@ export function Shop() {
         </div>
       )}
 
+      {activeTab !== "event" && <EventsAccordion />}
+
       {/* Filters */}
       <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -95,7 +98,7 @@ export function Shop() {
                     : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
                 }`}
               >
-                ✨ {eventName}
+                ✨ {eventDetail?.title}
               </button>
             )}
             <button
@@ -157,13 +160,12 @@ export function Shop() {
         />
       </section>
 
-      {/* Event gallery above product grid */}
-      {activeTab === "event" && filteredProducts.length > 0 && (
+      {activeTab === "event" && eventDetail && (
         <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <AccordionGallery
-            items={filteredProducts.map((p) => ({
-              image: (p.images?.find((img) => img.is_primary) ?? p.images?.[0])?.image_url ?? "",
-              label: p.name,
+            items={(eventDetail.products ?? []).map((p) => ({
+              image: p.image_url ?? "",
+              label: `${p.name} — -${p.discount_percent}%`,
               link: `/products/${p.product_id}`,
             }))}
             defaultIndex={0}
