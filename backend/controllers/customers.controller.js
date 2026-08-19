@@ -7,6 +7,10 @@ export const getAll = async (req, res) => {
     const mod = await import('../models/customers.model.js');
     const CustomerModel = mod.default ?? mod;
     const data = await CustomerModel.getAllCustomers();
+
+    // ✅ Ensure every customer has a phone property
+    const normalized = data.map(c => ({ ...c, phone: c.phone ?? null }));
+
     return res.status(200).json(data);
   } catch (err) {
     console.error('Error fetching customers:', err);

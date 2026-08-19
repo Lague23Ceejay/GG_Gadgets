@@ -5,14 +5,18 @@ import db from "../config/db.js";
 export const getAllCustomers = async () => {
   try {
     const result = await db.query(
-      "SELECT * FROM GS_schema.api_customer_profile_vu ORDER BY customer->>'full_name' ASC"
+      "SELECT customer_id, full_name, email, archived, archive_reason FROM gs_schema.api_customer_profile_vu ORDER BY full_name ASC"
     );
-    return result.rows.map((r) => r.customer);
+
+    // ✅ Add placeholder for phone
+    return result.rows.map((r) => ({ ...r, phone: null }));
   } catch (err) {
     console.error("DB Error: getAllCustomers", err);
     throw err;
   }
 };
+
+
 
 // ✅ Get Customer by ID (procedure version)
 export const getCustomerById = async (id) => {
