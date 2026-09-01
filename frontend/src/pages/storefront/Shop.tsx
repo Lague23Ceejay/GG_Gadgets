@@ -20,12 +20,9 @@ export function Shop() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const eventId = searchParams.get("event_id");
+  const hasEventFilter = !!eventId;
   const [eventDetail, setEventDetail] = useState<PromoEvent | null>(null);
-  const hasEventFilter = !!eventDetail;
-
-  const [activeTab, setActiveTab] = useState<"all" | "sale" | "event">(
-    hasEventFilter ? "event" : "all"
-  );
+  const [activeTab, setActiveTab] = useState<"all" | "sale" | "event">(eventId ? "event" : "all");
 
   const exitEventTab = () => {
     setActiveTab("all");
@@ -98,7 +95,7 @@ export function Shop() {
                     : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400"
                 }`}
               >
-                ✨ {eventDetail?.title}
+                ✨ {eventDetail?.title ?? "Loading…"}
               </button>
             )}
             <button
@@ -160,20 +157,26 @@ export function Shop() {
         />
       </section>
 
-      {activeTab === "event" && eventDetail && (
-        <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
-          <AccordionGallery
-            items={(eventDetail.products ?? []).map((p) => ({
-              image: p.image_url ?? "",
-              label: `${p.name} — -${p.discount_percent}%`,
-              link: `/products/${p.product_id}`,
-            }))}
-            defaultIndex={0}
-            trigger="hover"
-            accentColor="#5B5FEF"
-            overlayColor="#0B0B0F"
-          />
-        </section>
+      {activeTab === "event" && (
+        eventDetail ? (
+          <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+            <AccordionGallery
+              items={(eventDetail.products ?? []).map((p) => ({
+                image: p.image_url ?? "",
+                label: `${p.name} — -${p.discount_percent}%`,
+                link: `/products/${p.product_id}`,
+              }))}
+              defaultIndex={0}
+              trigger="hover"
+              accentColor="#5B5FEF"
+              overlayColor="#0B0B0F"
+            />
+          </section>
+        ) : (
+          <p className="mx-auto max-w-6xl px-4 pt-6 text-sm text-zinc-500 sm:px-6">
+            Loading event…
+          </p>
+        )
       )}
 
       {/* Product grid */}
